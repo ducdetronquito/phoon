@@ -6,22 +6,25 @@ from routing import dispatch, Route
 
 type
     App* = object
-        route: Route
+        routes: seq[Route]
 
 proc get*(app: var App, path: string, callback: proc (request: Request): Future[system.void]) =
-    app.route = Route(
-        path: path,
-        callback: callback,
-        http_method: HttpMethod.HttpGet
+    app.routes.add(
+        Route(
+            path: path,
+            callback: callback,
+            http_method: HttpMethod.HttpGet
+        )
     )
 
 
 proc dispatch(app: App, request: Request): Future[void] =
-    var action = app.route.dispatch(request)
-    if action.isSome:
-        return action.get()(request)
-    else:
-        return request.respond(Http404, "")
+    for route in app.routes:
+        let action = route.dispatch(request)
+        if action.isSome:
+            return action.get()(request)
+
+    return request.respond(Http404, "")
 
 
 proc serve*(app: App) =
