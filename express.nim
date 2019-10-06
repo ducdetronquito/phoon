@@ -10,6 +10,7 @@ type
 
 proc get*(app: var App, path: string, callback: proc (request: Request): Future[system.void]) =
     app.route = Route(
+        path: path,
         callback: callback,
         http_method: HttpMethod.HttpGet
     )
