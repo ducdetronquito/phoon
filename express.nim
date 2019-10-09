@@ -8,14 +8,22 @@ type
     App* = object
         routes: seq[Route]
 
-proc get*(app: var App, path: string, callback: proc (request: Request): Future[system.void]) =
+
+proc add_route(app: var App, http_method: HttpMethod, path: string, callback: proc (request: Request): Future[system.void]) =
     app.routes.add(
         Route(
             path: path,
             callback: callback,
-            http_method: HttpMethod.HttpGet
+            http_method: http_method
         )
     )
+
+proc get*(app: var App, path: string, callback: proc (request: Request): Future[system.void]) =
+    app.add_route(HttpMethod.HttpGet, path, callback)
+
+
+proc post*(app: var App, path: string, callback: proc (request: Request): Future[system.void]) =
+    app.add_route(HttpMethod.HttpPost, path, callback)
 
 
 proc get_route(app: App, request: Request): Option[Route] =

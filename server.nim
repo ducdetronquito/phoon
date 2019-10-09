@@ -15,4 +15,9 @@ app.get("/about",
         await request.respond(Http200, "What are you talking about ?")
 )
 
+app.post("/users/",
+    proc (request: Request) {.async.} =
+        await request.respond(Http201, "Post-it")
+)
+
 app.serve()
