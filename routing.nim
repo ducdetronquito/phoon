@@ -14,16 +14,12 @@ type
         http_method*: HttpMethod
 
 
-proc match(route: Route, request: Request): bool =
-    return route.path == request.url.path
-
-
 proc match_method*(route: Route, request: Request): bool =
     return route.http_method == request.reqMethod
 
 
-proc dispatch*(route: Route, request: Request): Option[Route] =
-    if not route.match(request):
-        return none(Route)
+proc match_path*(route: Route, path: string): Option[Route] =
+    if route.path == path:
+        return some(route)
 
-    return some(route)
+    return none(Route)

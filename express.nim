@@ -1,7 +1,7 @@
 from asynchttpserver import Http404, Http405, HttpMethod, newAsyncHttpServer, respond, Request, serve
 import asyncdispatch
 from options import get, isNone, isSome, none, Option
-from routing import dispatch, match_method, Route
+from routing import match_path, match_method, Route
 
 
 type
@@ -28,8 +28,9 @@ proc post*(app: var App, path: string, callback: proc (request: Request): Future
 
 proc get_route(app: App, request: Request): Option[Route] =
     var potential_route: Option[Route]
+    let path = request.url.path
     for route in app.routes:
-        potential_route = route.dispatch(request)
+        potential_route = route.match_path(path)
         if potential_route.isSome:
             return potential_route
 
