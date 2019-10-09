@@ -18,11 +18,12 @@ proc match(route: Route, request: Request): bool =
     return route.path == request.url.path
 
 
-proc dispatch*(route: Route, request: Request): Option[Callback] =
-    if request.reqMethod != route.http_method:
-        return none(Callback)
+proc match_method*(route: Route, request: Request): bool =
+    return route.http_method == request.reqMethod
 
+
+proc dispatch*(route: Route, request: Request): Option[Route] =
     if not route.match(request):
-        return none(Callback)
+        return none(Route)
 
-    return some(route.callback)
+    return some(route)
