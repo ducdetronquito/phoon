@@ -1,6 +1,6 @@
 import asynchttpserver
 import asyncdispatch
-import express
+import express/express
 
 
 var app = App()
@@ -17,7 +17,12 @@ app.get("/about",
 
 app.post("/users/",
     proc (request: Request) {.async.} =
-        await request.respond(Http201, "Post-it")
+        await request.respond(Http201, "Daryl is now a new user")
+)
+
+app.get("/users/",
+    proc (request: Request) {.async.} =
+        await request.respond(Http200, "I know Daryl, Glenn and Michonne")
 )
 
 app.serve()

@@ -1,0 +1,25 @@
+from asyncdispatch import Future
+from asynchttpserver import Request, HttpMethod
+import options
+
+
+type
+    Callback* = proc(request: Request): Future[void]
+
+
+type
+    Route* = object
+        path*: string
+        callback*: Callback
+        get_callback*: Option[Callback]
+        post_callback*: Option[Callback]
+        http_method*: HttpMethod
+
+
+proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
+    if http_method == HttpMethod.HttpGet:
+        return route.get_callback
+    elif http_method == HttpMethod.HttpPost:
+        return route.post_callback
+    else:
+        return none(Callback)
