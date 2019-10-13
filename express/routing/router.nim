@@ -25,7 +25,6 @@ proc add_get_endpoint*(self: var Router, path: string, callback: Callback) =
         path: path,
         get_callback: some(callback),
         post_callback: none(Callback),
-        http_method: HttpMethod.HttpGet
     )
 
 
@@ -38,5 +37,4 @@ proc add_post_endpoint*(self: var Router, path: string, callback: Callback) =
         path: path,
         get_callback: none(Callback),
         post_callback: some(callback),
-        http_method: HttpMethod.HttpGet
     )

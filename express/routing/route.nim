@@ -13,7 +13,6 @@ type
         callback*: Callback
         get_callback*: Option[Callback]
         post_callback*: Option[Callback]
-        http_method*: HttpMethod
 
 
 proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
