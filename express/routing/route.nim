@@ -1,4 +1,4 @@
-from asynchttpserver import Request, HttpMethod
+import asynchttpserver
 import options
 import ../response
 

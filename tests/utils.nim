@@ -1,5 +1,5 @@
-from asynchttpserver import HttpMethod, Request
-from uri import parseUri
+import asynchttpserver
+import uri
 
 
 proc GetRequest*(path: string): Request =

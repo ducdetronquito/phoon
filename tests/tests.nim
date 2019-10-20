@@ -2,7 +2,7 @@ import asynchttpserver
 import ../express/express
 import ../express/response
 import unittest
-from ./utils import GetRequest, PostRequest
+import utils
 
 
 suite "Endpoints":
