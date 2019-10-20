@@ -1,10 +1,10 @@
-from asyncdispatch import Future
 from asynchttpserver import Request, HttpMethod
 import options
+import ../response
 
 
 type
-    Callback* = proc(request: Request): Future[void]
+    Callback* = proc(request: Request): Response
 
 
 type

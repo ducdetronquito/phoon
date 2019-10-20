@@ -1,4 +1,3 @@
-from asynchttpserver import HttpMethod
 import options
 import route
 import tables
