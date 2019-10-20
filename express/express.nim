@@ -29,8 +29,9 @@ proc dispatch*(app: App, request: Request): Response =
 
     if callback.isNone:
         return MethodNotAllowed("")
-
-    return callback.get()(request)
+    
+    {.gcsafe.}:
+        return callback.get()(request)
 
 
 proc serve*(app: App) =
