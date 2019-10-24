@@ -1,4 +1,6 @@
+import asynchttpserver
 import options
+import ../response
 import route
 import tables
 
@@ -6,6 +8,10 @@ import tables
 type
     Router* = object
         routes: Table[string, Route]
+
+
+proc get_routes*(self: Router): Table[string, Route] =
+    return self.routes
 
 
 proc get_route*(self: Router, path: string): Option[Route] =
@@ -37,3 +43,11 @@ proc add_post_endpoint*(self: var Router, path: string, callback: Callback) =
         get_callback: none(Callback),
         post_callback: some(callback),
     )
+
+
+proc get*(self: var Router, path: string, callback: proc (request: Request): Response) =
+    self.add_get_endpoint(path, callback)
+
+
+proc post*(self: var Router, path: string, callback: proc (request: Request): Response) =
+    self.add_post_endpoint(path, callback)

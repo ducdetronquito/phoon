@@ -25,5 +25,15 @@ app.post("/about",
         return Created("What are you talking about ?")
 )
 
+
+var router = Router()
+
+router.get("/users",
+    proc (request: Request): Response =
+            return Ok200("Here are some nice users")
+)
+
+app.mount("/nice", router)
+
 app.serve()
 ```
