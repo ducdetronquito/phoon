@@ -30,19 +30,7 @@ proc mount*(self: var App, path: string, router: Router) =
 
 
 proc dispatch*(app: App, request: Request): Response =
-    let path = request.url.path
-    let potential_route = app.router.get_route(path)
-    if potential_route.isNone:
-        return NotFound("")
-
-    let route = potential_route.get()
-    let callback = route.get_callback_of(request.reqMethod)
-
-    if callback.isNone:
-        return MethodNotAllowed("")
-    
-    {.gcsafe.}:
-        return callback.get()(request)
+    return app.router.dispatch(request)
 
 
 proc serve*(app: App) =
