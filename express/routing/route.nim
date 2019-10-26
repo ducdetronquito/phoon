@@ -9,8 +9,6 @@ type
 
 type
     Route* = object
-        path*: string
-        callback*: Callback
         get_callback*: Option[Callback]
         post_callback*: Option[Callback]
 
