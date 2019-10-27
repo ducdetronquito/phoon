@@ -6,18 +6,18 @@ import unittest
 suite "Tree":
 
     test "Insert root route":
-        var tree = Tree[string].create()
+        var tree = Tree[string].new()
         tree.insert("/", "Home")
         check(tree.retrieve("/").get() == "Home")
 
     test "Insert route":
-        var tree = Tree[string].create()
+        var tree = Tree[string].new()
         tree.insert("/users", "Bobby")
 
         check(tree.retrieve("/users").get() == "Bobby")
 
     test "Insert multiple routes":
-        var tree = Tree[string].create()
+        var tree = Tree[string].new()
 
         tree.insert("/", "Home")
         tree.insert("/users", "Bobby")
@@ -28,7 +28,7 @@ suite "Tree":
         check(tree.retrieve("/users/age").get() == "42")
 
     test "Retrieve undefined route":
-        var tree = Tree[string].create()
+        var tree = Tree[string].new()
         tree.insert("/users", "Bobby")
 
         check(tree.retrieve("/admins").isNone)

@@ -12,8 +12,8 @@ type
         root*: Node[T]
 
 
-proc create*[T](tree_type: type[Tree[T]]): Tree[T] =
-    var root = new Node[T]
+proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
+    var root = system.new(Node[T])
     root.label = '~'
     return tree_type(root: root)
 
