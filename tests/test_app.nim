@@ -77,19 +77,3 @@ suite "Endpoints":
       )
       let response = app.dispatch(request)
       check(response.status_code == Http405)
-
-    test "Can define a nested router":
-        var app = App.new()
-
-        var router = Router()
-        router.get("/users",
-            proc (request: Request): Response =
-                return Ok200("Some nice users")
-        )
-
-        app.mount("/api/v1", router)
-
-        let request = GetRequest("https://yumad.bro/api/v1/users")
-        let response = app.dispatch(request)
-        check(response.status_code == Http200)
-        check(response.body == "Some nice users")

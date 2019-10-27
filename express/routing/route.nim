@@ -8,7 +8,7 @@ type
 
 
 type
-    Route* = object
+    Route* = ref object
         get_callback*: Option[Callback]
         post_callback*: Option[Callback]
 

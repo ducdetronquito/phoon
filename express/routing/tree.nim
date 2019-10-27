@@ -8,7 +8,7 @@ type
         children*: Table[char, Node[T]]
         value*: T
 
-    Tree*[T] = object
+    Tree*[T] = ref object
         root*: Node[T]
 
 
