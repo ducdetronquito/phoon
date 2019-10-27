@@ -7,8 +7,14 @@ import response
 import tables
 
 type
-    App* = object
+    App* = ref object
         router: Router
+
+
+proc new*(app_type: type[App]): App =
+    var app = system.new(App)
+    app.router = Router.new()
+    return app
 
 
 proc get*(app: var App, path: string, callback: proc (request: Request): Response) =

@@ -6,8 +6,12 @@ import tables
 
 
 type
-    Router* = object
+    Router* = ref object
         routes: Table[string, Route]
+
+
+proc new*(app_type: type[Router]): Router =
+    return system.new(Router)
 
 
 proc get_routes*(self: Router): Table[string, Route] =
