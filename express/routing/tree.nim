@@ -6,7 +6,7 @@ type
     Node[T] = ref object
         label*: char
         children*: Table[char, Node[T]]
-        value*: T
+        value*: Option[T]
         is_leaf: bool
 
     Tree*[T] = ref object
@@ -29,10 +29,11 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
         var node = new Node[T]
         node.label = character
+
         current_node.children.add(character, node)
         current_node = node
 
-    current_node.value = value
+    current_node.value = some(value)
     current_node.is_leaf = true
 
 
@@ -46,6 +47,6 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
             return none(T)
 
     if current_node.is_leaf:
-        return some(current_node.value)
+        return some(current_node.value.get())
     else:
         return none(T)
