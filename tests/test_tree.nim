@@ -27,8 +27,14 @@ suite "Tree":
         check(tree.retrieve("/users").get() == "Bobby")
         check(tree.retrieve("/users/age").get() == "42")
 
-    test "Retrieve undefined route":
+    test "Fail to retrieve an undefined route.":
         var tree = Tree[string].new()
         tree.insert("/users", "Bobby")
 
         check(tree.retrieve("/admins").isNone)
+
+    test "Fail to retrieve a partial route.":
+        var tree = Tree[string].new()
+        tree.insert("/users-that-are-nice", "Bobby")
+
+        check(tree.retrieve("/users").isNone)
