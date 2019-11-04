@@ -28,6 +28,10 @@ proc post*(self: var App, path: string, callback: proc (request: Request): Respo
     self.router.post(path, callback)
 
 
+proc mount*(self: var App, path: string, router: Router) =
+    self.router.mount(path, router)
+
+
 proc compile_routes*(self: var App) =
     for path, route in self.router.get_route_pairs():
         self.routing_table.insert(path, route)

@@ -39,3 +39,8 @@ proc post*(self: var Router, path: string, callback: proc (request: Request): Re
 iterator get_route_pairs*(self: Router): tuple[path: string, route: Route] =
     for path, route in self.routes.pairs:
         yield (path, route)
+
+
+proc mount*(self: var Router, path: string, router: Router) =
+    for sub_path, route in router.get_route_pairs():
+        self.routes.add(path & sub_path, route)
