@@ -13,7 +13,7 @@ suite "Endpoints":
         var app = App.new()
         app.get("/",
             proc (request: Request): Response =
-                return Ok200("I am a boring home page")
+                return Ok("I am a boring home page")
         )
         app.compile_routes()
         let response = app.dispatch(request)
@@ -41,7 +41,7 @@ suite "Endpoints":
         )
         app.get("/memes",
             proc (request: Request): Response =
-                return Ok200("Retrieve all the good memes")
+                return Ok("Retrieve all the good memes")
         )
         app.compile_routes()
         let response = app.dispatch(request)
@@ -52,7 +52,7 @@ suite "Endpoints":
       var app = App.new()
       app.get("/memes",
           proc (request: Request): Response =
-              return Ok200("Retrieve all the good memes")
+              return Ok("Retrieve all the good memes")
       )
       app.post("/memes",
           proc (request: Request): Response =
@@ -67,7 +67,7 @@ suite "Endpoints":
         var app = App.new()
         app.get("/",
             proc (request: Request): Response =
-                return Ok200("I am a boring home page")
+                return Ok("I am a boring home page")
         )
         app.compile_routes()
         let response = app.dispatch(request)
@@ -78,7 +78,7 @@ suite "Endpoints":
       var app = App.new()
       app.post("/",
           proc (request: Request): Response =
-              return Ok200("I am a boring home page")
+              return Ok("I am a boring home page")
       )
       app.compile_routes()
       let response = app.dispatch(request)
@@ -91,7 +91,7 @@ suite "Endpoints":
         var router = Router.new()
         router.get("/users",
             proc (request: Request): Response =
-                return Ok200("Some nice users")
+                return Ok("Some nice users")
         )
 
         app.mount("/api/v1", router)

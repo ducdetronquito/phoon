@@ -17,7 +17,7 @@ var app = App()
 
 app.get("/",
     proc (request: Request): Response =
-        return Ok200("I am a boring home page")
+        return Ok("I am a boring home page")
 )
 
 app.post("/about",
@@ -30,7 +30,7 @@ var router = Router()
 
 router.get("/users",
     proc (request: Request): Response =
-            return Ok200("Here are some nice users")
+            return Ok("Here are some nice users")
 )
 
 app.mount("/nice", router)

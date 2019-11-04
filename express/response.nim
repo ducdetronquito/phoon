@@ -17,9 +17,7 @@ proc MethodNotAllowed*(body: string): Response =
     return response
 
 
-# TODO: Rename the method `Ok` when the next version of Nim is out.
-# Cf: https://github.com/nim-lang/Nim/issues/12465
-proc Ok200*(body: string): Response =
+proc Ok*(body: string): Response =
     var response = Response(status_code: Http200, body: body)
     return response
 
