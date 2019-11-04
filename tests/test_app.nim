@@ -15,6 +15,7 @@ suite "Endpoints":
             proc (request: Request): Response =
                 return Ok200("I am a boring home page")
         )
+        app.compile_routes()
         let response = app.dispatch(request)
         check(response.status_code == Http200)
         check(response.body == "I am a boring home page")
@@ -26,6 +27,7 @@ suite "Endpoints":
             proc (request: Request): Response =
                 return Created("I super JSON payloard")
         )
+        app.compile_routes()
         let response = app.dispatch(request)
         check(response.status_code == Http201)
         check(response.body == "I super JSON payloard")
@@ -41,6 +43,7 @@ suite "Endpoints":
             proc (request: Request): Response =
                 return Ok200("Retrieve all the good memes")
         )
+        app.compile_routes()
         let response = app.dispatch(request)
         check(response.status_code == Http200)
 
@@ -55,6 +58,7 @@ suite "Endpoints":
           proc (request: Request): Response =
               return Created("Create a meme")
       )
+      app.compile_routes()
       let response = app.dispatch(request)
       check(response.status_code == Http201)
 
@@ -65,6 +69,7 @@ suite "Endpoints":
             proc (request: Request): Response =
                 return Ok200("I am a boring home page")
         )
+        app.compile_routes()
         let response = app.dispatch(request)
         check(response.status_code == Http404)
 
@@ -75,5 +80,6 @@ suite "Endpoints":
           proc (request: Request): Response =
               return Ok200("I am a boring home page")
       )
+      app.compile_routes()
       let response = app.dispatch(request)
       check(response.status_code == Http405)
