@@ -1,5 +1,6 @@
 import asynchttpserver
 import asyncdispatch
+import context
 import options
 import routing/route
 import routing/router
@@ -37,27 +38,29 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, route)
 
 
-proc dispatch*(self: App, request: Request): Response =
-    let path = request.url.path
+proc dispatch*(self: App, context: Context): Response =
+    let path = context.request.url.path
 
     let potential_route = self.routing_table.retrieve(path)
     if potential_route.isNone:
         return NotFound("")
 
     let route = potential_route.get()
-    let callback = route.get_callback_of(request.reqMethod)
+    let callback = route.get_callback_of(context.request.reqMethod)
 
     if callback.isNone:
         return MethodNotAllowed("")
 
     {.gcsafe.}:
-        return callback.get()(request)
+        return callback.get()(context)
 
 
 proc serve*(self: var App) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        let response = self.dispatch(request)
+        let context = new Context
+        context.request = request
+        let response = self.dispatch(context)
         await request.respond(response.status_code, response.body)
 
     self.compile_routes()
