@@ -38,30 +38,32 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, route)
 
 
-proc dispatch*(self: App, context: Context): Response =
+proc dispatch*(self: App, context: Context) =
     let path = context.request.url.path
 
     let potential_route = self.routing_table.retrieve(path)
     if potential_route.isNone:
-        return NotFound("")
+        context.Response(Http404, "")
+        return
 
     let route = potential_route.get()
     let callback = route.get_callback_of(context.request.reqMethod)
 
     if callback.isNone:
-        return MethodNotAllowed("")
+        context.Response(Http405, "")
+        return
 
     {.gcsafe.}:
-        return callback.get()(context)
+        callback.get()(context)
 
 
 proc serve*(self: var App) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        let context = new Context
+        var context = new Context
         context.request = request
-        let response = self.dispatch(context)
-        await request.respond(response.status_code, response.body)
+        self.dispatch(context)
+        await request.respond(context.response.status_code, context.response.body)
 
     self.compile_routes()
 
