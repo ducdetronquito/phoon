@@ -20,11 +20,11 @@ proc new*(app_type: type[App]): App =
     return app
 
 
-proc get*(self: var App, path: string, callback: proc (request: Request): Response) =
+proc get*(self: var App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
 
-proc post*(self: var App, path: string, callback: proc (request: Request): Response) =
+proc post*(self: var App, path: string, callback: Callback) =
     self.router.post(path, callback)
 
 
