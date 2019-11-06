@@ -1,5 +1,6 @@
 import asynchttpserver
 import asyncdispatch
+import context
 import options
 import routing/route
 import routing/router
@@ -20,11 +21,11 @@ proc new*(app_type: type[App]): App =
     return app
 
 
-proc get*(self: var App, path: string, callback: proc (request: Request): Response) =
+proc get*(self: var App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
 
-proc post*(self: var App, path: string, callback: proc (request: Request): Response) =
+proc post*(self: var App, path: string, callback: Callback) =
     self.router.post(path, callback)
 
 
@@ -37,28 +38,32 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, route)
 
 
-proc dispatch*(self: App, request: Request): Response =
-    let path = request.url.path
+proc dispatch*(self: App, context: Context) =
+    let path = context.request.url.path
 
     let potential_route = self.routing_table.retrieve(path)
     if potential_route.isNone:
-        return NotFound("")
+        context.Response(Http404, "")
+        return
 
     let route = potential_route.get()
-    let callback = route.get_callback_of(request.reqMethod)
+    let callback = route.get_callback_of(context.request.reqMethod)
 
     if callback.isNone:
-        return MethodNotAllowed("")
+        context.Response(Http405, "")
+        return
 
     {.gcsafe.}:
-        return callback.get()(request)
+        callback.get()(context)
 
 
 proc serve*(self: var App) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        let response = self.dispatch(request)
-        await request.respond(response.status_code, response.body)
+        var context = new Context
+        context.request = request
+        self.dispatch(context)
+        await request.respond(context.response.status_code, context.response.body)
 
     self.compile_routes()
 

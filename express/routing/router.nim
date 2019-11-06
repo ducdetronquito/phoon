@@ -1,8 +1,7 @@
-import asynchttpserver
 import options
-import ../response
 import route
 import tables
+
 
 type
     Router* = ref object
@@ -14,7 +13,7 @@ proc new*(router_type: type[Router]): Router =
     return router
 
 
-proc get*(self: var Router, path: string, callback: proc (request: Request): Response) =
+proc get*(self: var Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].get_callback = some(callback)
         return
@@ -25,7 +24,7 @@ proc get*(self: var Router, path: string, callback: proc (request: Request): Res
     self.routes.add(path, route)
 
 
-proc post*(self: var Router, path: string, callback: proc (request: Request): Response) =
+proc post*(self: var Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].post_callback = some(callback)
         return

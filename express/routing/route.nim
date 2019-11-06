@@ -1,10 +1,10 @@
 import asynchttpserver
+import ../context
 import options
-import ../response
 
 
 type
-    Callback* = proc(request: Request): Response
+    Callback* = proc(context: Context)
 
 
 type
