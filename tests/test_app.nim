@@ -1,6 +1,7 @@
 import asynchttpserver
 import ../express/context
 import ../express/express
+import ../express/handler
 import ../express/routing/router
 import unittest
 import utils
@@ -100,3 +101,27 @@ suite "Endpoints":
         app.dispatch(context)
         check(context.response.status_code == Http200)
         check(context.response.body == "Some nice users")
+
+    test "Can register a middleware":
+        var context = Context.from_request(GetRequest("https://yumad.bro/"))
+        var app = App.new()
+
+        app.get("/",
+            proc (context: Context) =
+                context.Response(Http200, "I am a boring home page")
+        )
+
+        proc EarlyReturnMiddleware(callback: Callback): Callback =
+            return proc (context: Context) =
+                if context.request.url.path == "/":
+                    context.Response(Http404, "Not Found")
+                    return
+                callback(context)
+
+        app.use(EarlyReturnMiddleware)
+
+        app.compile_routes()
+
+        app.dispatch(context)
+        check(context.response.status_code == Http404)
+        check(context.response.body == "Not Found")

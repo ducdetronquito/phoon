@@ -1,11 +1,11 @@
 import asynchttpserver
 import asyncdispatch
 import context
+import handler
 import options
 import routing/route
 import routing/router
 import routing/tree
-import response
 
 
 type
@@ -34,8 +34,19 @@ proc mount*(self: var App, path: string, router: Router) =
 
 
 proc compile_routes*(self: var App) =
+    let middlewares = self.router.get_middlewares()
+
     for path, route in self.router.get_route_pairs():
-        self.routing_table.insert(path, route)
+        var compile_route = new Route
+        if route.get_callback.isSome:
+            let callback = route.get_callback.get().apply(middlewares)
+            compile_route.get_callback = some(callback)
+
+        if route.post_callback.isSome:
+            let callback =route.post_callback.get().apply(middlewares)
+            compile_route.post_callback = some(callback)
+
+        self.routing_table.insert(path, compile_route)
 
 
 proc dispatch*(self: App, context: Context) =
@@ -55,6 +66,10 @@ proc dispatch*(self: App, context: Context) =
 
     {.gcsafe.}:
         callback.get()(context)
+
+
+proc use*(self: App, middleware: Middleware) =
+    self.router.use(middleware)
 
 
 proc serve*(self: var App) =
