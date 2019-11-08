@@ -1,3 +1,4 @@
+import ../handler
 import options
 import route
 import tables
@@ -6,6 +7,7 @@ import tables
 type
     Router* = ref object
         routes: Table[string, Route]
+        middlewares: seq[Middleware]
 
 
 proc new*(router_type: type[Router]): Router =
@@ -40,6 +42,14 @@ iterator get_route_pairs*(self: Router): tuple[path: string, route: Route] =
         yield (path, route)
 
 
+proc get_middlewares*(self: Router): seq[Middleware] =
+    return self.middlewares
+
+
 proc mount*(self: var Router, path: string, router: Router) =
     for sub_path, route in router.get_route_pairs():
         self.routes.add(path & sub_path, route)
+
+
+proc use*(self: Router, middleware: Middleware) =
+    self.middlewares.add(middleware)
