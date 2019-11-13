@@ -2,8 +2,13 @@ import options
 
 
 type
+    PathType* = enum
+        Strict,
+        Wildcard
+
     Node[T] = ref object
         path*: char
+        path_type*: PathType
         children*: seq[Node[T]]
         value*: Option[T]
         is_leaf: bool
@@ -27,6 +32,7 @@ proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
 
 
 proc insert*[T](self: var Tree, path: string, value: T) =
+    # TODO: Add early check to disallow URL with characters after a wildcard.
     var current_node = self.root
 
     for character in path:
@@ -44,6 +50,10 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
     current_node.value = some(value)
     current_node.is_leaf = true
+
+    if current_node.path == '*':
+        current_node.path_type = PathType.Wildcard
+
 
 
 proc retrieve*[T](self: var Tree[T], path: string): Option[T] =

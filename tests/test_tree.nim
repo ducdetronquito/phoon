@@ -38,3 +38,10 @@ suite "Tree":
         tree.insert("/users-that-are-nice", "Bobby")
 
         check(tree.retrieve("/users").isNone)
+
+    test "Insert a route with a wildcard":
+        var tree = Tree[string].new()
+        tree.insert("/user*", "Bobby")
+        let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0]
+        check(last_node.path == '*')
+        check(last_node.path_type == PathType.Wildcard)
