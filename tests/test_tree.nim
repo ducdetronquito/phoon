@@ -45,3 +45,10 @@ suite "Tree":
         let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0]
         check(last_node.path == '*')
         check(last_node.path_type == PathType.Wildcard)
+
+    test "Cannot insert route with characters after wildcard":
+        var tree = Tree[string].new()
+        try:
+            tree.insert("/user*-that-are-sexy", "Bobby")
+        except InvalidPathError:
+            discard

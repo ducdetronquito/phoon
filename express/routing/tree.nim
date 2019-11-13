@@ -1,7 +1,10 @@
 import options
+import strutils
 
 
 type
+    InvalidPathError* = ref object of Exception
+
     PathType* = enum
         Strict,
         Wildcard
@@ -31,8 +34,18 @@ proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
     return none(Node[T])
 
 
+proc check_illegal_patterns(path: string) =
+    if not path.contains("*"):
+        return
+
+    let after_wildcard_part = path.rsplit("*", maxsplit = 1)[1]
+    if after_wildcard_part.len != 0:
+        raise InvalidPathError(msg: "A path cannot defined character after a wildcard.")
+
+
 proc insert*[T](self: var Tree, path: string, value: T) =
-    # TODO: Add early check to disallow URL with characters after a wildcard.
+    path.check_illegal_patterns()
+
     var current_node = self.root
 
     for character in path:
@@ -53,7 +66,6 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
     if current_node.path == '*':
         current_node.path_type = PathType.Wildcard
-
 
 
 proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
