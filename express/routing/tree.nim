@@ -3,7 +3,7 @@ import options
 
 type
     Node[T] = ref object
-        label*: char
+        path*: char
         children*: seq[Node[T]]
         value*: Option[T]
         is_leaf: bool
@@ -14,13 +14,13 @@ type
 
 proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
     var root = system.new(Node[T])
-    root.label = '~'
+    root.path = '~'
     return tree_type(root: root)
 
 
-proc find_child_by_label[T](self: Node[T], label: char): Option[Node[T]] =
+proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
     for child in self.children:
-        if child.label == label:
+        if child.path == path:
             return some(child)
 
     return none(Node[T])
@@ -31,13 +31,13 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
     for character in path:
 
-        let child = current_node.find_child_by_label(character)
+        let child = current_node.find_child_by_path(character)
         if child.isSome:
             current_node = child.get()
             continue
 
         var node = new Node[T]
-        node.label = character
+        node.path = character
 
         current_node.children.add(node)
         current_node = node
@@ -50,7 +50,7 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
     var current_node = self.root
 
     for character in path:
-        let child = current_node.find_child_by_label(character)
+        let child = current_node.find_child_by_path(character)
         if child.isNone:
             return none(T)
 
