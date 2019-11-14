@@ -52,3 +52,10 @@ suite "Tree":
             tree.insert("/user*-that-are-sexy", "Bobby")
         except InvalidPathError:
             discard
+
+    test "Retrieve a wildcard route":
+        var tree = Tree[string].new()
+        tree.insert("/users-that-are-grumpy", "Grumpy Cat")
+        tree.insert("/users*", "Bobby")
+
+        check(tree.retrieve("/users-that-are-nice").get() == "Bobby")
