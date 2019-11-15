@@ -38,3 +38,24 @@ suite "Tree":
         tree.insert("/users-that-are-nice", "Bobby")
 
         check(tree.retrieve("/users").isNone)
+
+    test "Insert a route with a wildcard":
+        var tree = Tree[string].new()
+        tree.insert("/user*", "Bobby")
+        let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0]
+        check(last_node.path == '*')
+        check(last_node.path_type == PathType.Wildcard)
+
+    test "Cannot insert route with characters after wildcard":
+        var tree = Tree[string].new()
+        try:
+            tree.insert("/user*-that-are-sexy", "Bobby")
+        except InvalidPathError:
+            discard
+
+    test "Retrieve a wildcard route":
+        var tree = Tree[string].new()
+        tree.insert("/users-that-are-grumpy", "Grumpy Cat")
+        tree.insert("/users*", "Bobby")
+
+        check(tree.retrieve("/users-that-are-nice").get() == "Bobby")
