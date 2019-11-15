@@ -52,10 +52,26 @@ suite "Tree":
         doAssertRaises(InvalidPathError):
             tree.insert("/user*-that-are-sexy", "Bobby")
 
-
     test "Retrieve a wildcard route":
         var tree = Tree[string].new()
         tree.insert("/users-that-are-grumpy", "Grumpy Cat")
         tree.insert("/users*", "Bobby")
 
         check(tree.retrieve("/users-that-are-nice").get() == "Bobby")
+
+    test "Retrieve a wildcard route on partial match":
+        var tree = Tree[string].new()
+        tree.insert("/users-that-are-nice", "John")
+        tree.insert("/*", "Bobby")
+
+        check(tree.retrieve("/users").get() == "Bobby")
+
+    test "Retrieve a match-all route":
+        var tree = Tree[string].new()
+        tree.insert("*", "Gotta catch'em all!")
+        tree.insert("/earth", "Diglett")
+        tree.insert("/wind", "Charmander")
+        tree.insert("/fire", "Pidgey")
+
+        check(tree.retrieve("/").get() == "Gotta catch'em all!")
+        check(tree.retrieve("/random-pokemon").get() == "Gotta catch'em all!")
