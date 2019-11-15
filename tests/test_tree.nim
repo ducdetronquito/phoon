@@ -48,10 +48,10 @@ suite "Tree":
 
     test "Cannot insert route with characters after wildcard":
         var tree = Tree[string].new()
-        try:
+
+        doAssertRaises(InvalidPathError):
             tree.insert("/user*-that-are-sexy", "Bobby")
-        except InvalidPathError:
-            discard
+
 
     test "Retrieve a wildcard route":
         var tree = Tree[string].new()
