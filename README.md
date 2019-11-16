@@ -10,11 +10,11 @@ Subject to changes, you know ¯\\_(ツ)_/¯
 
 ```nim
 import asynchttpserver
-import express/express
-import express/context
+import ../express/express
+import ../express/context
+import ../express/routing/router
 
-
-var app = App()
+var app = new App
 
 app.get("/",
     proc (context: Context) =
@@ -27,14 +27,14 @@ app.post("/about",
 )
 
 
-var router = Router()
+var sub_router = Router()
 
-router.get("/users",
+sub_router.get("/users",
     proc (context: Context) =
         context.Response(Http200, "Here are some nice users")
 )
 
-app.mount("/nice", router)
+app.mount("/nice", sub_router)
 
 app.serve()
 ```
