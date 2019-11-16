@@ -72,15 +72,15 @@ proc use*(self: App, middleware: Middleware) =
     self.router.use(middleware)
 
 
-proc serve*(self: var App) =
+proc serve*(self: App) =
+    var app = deepCopy(self)
+    app.compile_routes()
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = new Context
         context.request = request
-        self.dispatch(context)
+        app.dispatch(context)
         await request.respond(context.response.status_code, context.response.body)
-
-    self.compile_routes()
 
     let server = newAsyncHttpServer()
     waitFor server.serve(Port(8080), main_dispatch)
