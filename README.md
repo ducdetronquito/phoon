@@ -1,14 +1,10 @@
 
 # Express 🚀🌘
 
-.. image:: https://img.shields.io/badge/license-public%20domain-ff69b4.svg
-    :target: https://github.com/ducdetronquito/express#license
-
-.. image:: https://api.travis-ci.org/ducdetronquito/express.svg?branch=master
-     :target: https://travis-ci.org/ducdetronquito/express
-
-
 A toy Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/), [Echo](https://github.com/labstack/echo) and [Starlette](https://github.com/encode/starlette).
+
+
+[![Build Status](https://api.travis-ci.org/ducdetronquito/express.svg?branch=master)](https://travis-ci.org/ducdetronquito/express) [![License](https://img.shields.io/badge/license-public%20domain-ff69b4.svg)](https://github.com/ducdetronquito/express#license)
 
 
 ## Usage
@@ -47,7 +43,6 @@ app.serve()
 ```
 
 
-License
-~~~~~~~
+## License
 
 **Express** is released into the **Public Domain**. 🎉🍻
