@@ -1,7 +1,7 @@
 import asynchttpserver
-import ../express/express
-import ../express/context
-import ../express/routing/router
+import express
+import express/context
+import express/routing/router
 
 var app = new App
 
