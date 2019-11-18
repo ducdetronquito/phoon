@@ -1,8 +1,8 @@
 import asynchttpserver
-import ../express/context
-import ../express/express
-import ../express/handler
-import ../express/routing/router
+import express
+import express/context
+import express/handler
+import express/routing/router
 import unittest
 import utils
 

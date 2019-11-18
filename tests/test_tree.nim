@@ -1,5 +1,5 @@
 import options
-import ../express/routing/tree
+import express/routing/tree
 import unittest
 
 
