@@ -23,6 +23,11 @@ suite "Integration tests":
         check(response.status == "200 OK")
         check(response.body == "Here are some nice users")
 
+    test "Get request on a wildcard endpoint":
+        let response = client.get("http://localhost:8080/abstract")
+        check(response.status == "200 OK")
+        check(response.body == "I am a wildard page !")
+
     test "Post request":
         let response = client.post("http://localhost:8080/about")
         check(response.status == "201 Created")
@@ -38,5 +43,6 @@ suite "Integration tests":
         check(response.status == "405 Method Not Allowed")
         check(response.body == "")
 
-    process.terminate()
+    # TODO: The process is still running even after being killed.
+    process.kill()
     process.close()
