@@ -6,7 +6,7 @@ import unittest
 suite "Integration tests":
     var process = startProcess(
         "nim",
-        args=["c", "-r", "tests/example.nim"],
+        args=["c", "-r", "tests/integration/simple_server.nim"],
         options={ProcessOption.poUsePath}
     )
 
