@@ -1,10 +1,9 @@
 import options
 import strutils
+import express/routing/errors
 
 
 type
-    InvalidPathError* = ref object of Exception
-
     PathType* = enum
         Strict,
         Wildcard
