@@ -29,6 +29,11 @@ app.post("/about",
         context.Response(Http201, "What are you talking about ?")
 )
 
+app.get("/ab*",
+    proc (context: Context) =
+        context.Response(Http200, "I am a wildard page !")
+)
+
 
 var sub_router = Router()
 
