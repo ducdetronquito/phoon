@@ -1,7 +1,7 @@
-import ../handler
+import express/handler
 import express/routing/errors
+import express/routing/route
 import options
-import route
 import strutils
 import tables
 
