@@ -2,6 +2,7 @@ import asynchttpserver
 import express
 import express/context
 import express/handler
+import express/routing/errors
 import express/routing/router
 import unittest
 import utils
@@ -101,6 +102,19 @@ suite "Endpoints":
         app.dispatch(context)
         check(context.response.status_code == Http200)
         check(context.response.body == "Some nice users")
+
+    test "Cannot define a nested router on a wildcard route":
+        var context = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
+        var app = App.new()
+
+        var router = Router.new()
+        router.get("/users",
+            proc (context: Context) =
+                context.Response(Http200, "Some nice users")
+        )
+
+        doAssertRaises(InvalidPathError):
+            app.mount("/api/*", router)
 
     test "Can register a middleware":
         var context = Context.from_request(GetRequest("https://yumad.bro/"))

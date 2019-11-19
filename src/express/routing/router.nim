@@ -1,6 +1,8 @@
-import ../handler
+import express/handler
+import express/routing/errors
+import express/routing/route
 import options
-import route
+import strutils
 import tables
 
 
@@ -47,6 +49,9 @@ proc get_middlewares*(self: Router): seq[Middleware] =
 
 
 proc mount*(self: var Router, path: string, router: Router) =
+    if path.contains("*"):
+        raise InvalidPathError(msg: "Cannot mount a sub-router on a wildcard route.")
+
     for sub_path, route in router.get_route_pairs():
         self.routes.add(path & sub_path, route)
 
