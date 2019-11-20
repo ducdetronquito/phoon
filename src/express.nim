@@ -37,15 +37,7 @@ proc compile_routes*(self: var App) =
     let middlewares = self.router.get_middlewares()
 
     for path, route in self.router.get_route_pairs():
-        var compile_route = new Route
-        if route.get_callback.isSome:
-            let callback = route.get_callback.get().apply(middlewares)
-            compile_route.get_callback = some(callback)
-
-        if route.post_callback.isSome:
-            let callback =route.post_callback.get().apply(middlewares)
-            compile_route.post_callback = some(callback)
-
+        var compile_route = route.apply(middlewares)
         self.routing_table.insert(path, compile_route)
 
 

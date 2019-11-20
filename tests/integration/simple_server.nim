@@ -1,5 +1,6 @@
 import asynchttpserver
 import express
+import express/handler
 import express/context
 import express/routing/router
 
@@ -30,5 +31,25 @@ sub_router.get("/users",
 )
 
 app.mount("/nice", sub_router)
+
+
+var authenticated_router = Router()
+
+authenticated_router.get("/",
+    proc (context: Context) =
+        context.Response(Http200, "Admins, he is doing it sideways !")
+)
+
+
+proc SimpleAuthMiddleware(callback: Callback): Callback =
+    return proc (context: Context) =
+        if context.request.headers.hasKey("simple-auth"):
+            callback(context)
+        else:
+            context.Response(Http401, "")
+
+
+authenticated_router.use(SimpleAuthMiddleware)
+app.mount("/admins", authenticated_router)
 
 app.serve()

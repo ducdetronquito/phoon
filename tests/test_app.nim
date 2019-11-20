@@ -125,17 +125,40 @@ suite "Endpoints":
                 context.Response(Http200, "I am a boring home page")
         )
 
-        proc EarlyReturnMiddleware(callback: Callback): Callback =
+        proc TeapotMiddleware(callback: Callback): Callback =
             return proc (context: Context) =
-                if context.request.url.path == "/":
-                    context.Response(Http404, "Not Found")
+                if context.request.url.path != "teapot":
+                    context.Response(Http418, "")
                     return
                 callback(context)
 
-        app.use(EarlyReturnMiddleware)
+        app.use(TeapotMiddleware)
 
         app.compile_routes()
 
         app.dispatch(context)
-        check(context.response.status_code == Http404)
-        check(context.response.body == "Not Found")
+        check(context.response.status_code == Http418)
+
+    test "Can register a middleware on a sub-router":
+        var context = Context.from_request(GetRequest("https://yumad.bro/users/"))
+        var app = App.new()
+
+        var router = Router.new()
+        router.get("/",
+            proc (context: Context) =
+                context.Response(Http200, "I am a boring home page")
+        )
+
+        proc TeapotMiddleware(callback: Callback): Callback =
+            return proc (context: Context) =
+                if context.request.url.path != "teapot":
+                    context.Response(Http418, "")
+                    return
+                callback(context)
+
+        router.use(TeapotMiddleware)
+        app.mount("/users", router)
+
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http418)
