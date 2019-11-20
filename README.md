@@ -9,13 +9,13 @@ A toy Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/),
 
 ## Usage
 
-Subject to changes, you know ¯\\_(ツ)_/¯
+Nota Bene: *Express is in its early stage, so every of its aspects is subject to changes* 🌪️
 
+### Create an application:
 ```nim
 import asynchttpserver
 import express
 import express/context
-import express/routing/router
 
 var app = new App
 
@@ -24,16 +24,25 @@ app.get("/",
         context.Response(Http200, "I am a boring home page")
 )
 
-app.post("/about",
+app.post("/users",
     proc (context: Context) =
-        context.Response(Http201, "What are you talking about ?")
+        context.Response(Http201, "You just created a new user !")
 )
 
-app.get("/ab*",
+app.get("/us*",
     proc (context: Context) =
-        context.Response(Http200, "I am a wildard page !")
+        context.Response(Http200, "Every URL starting with 'us' falls back here.")
 )
 
+app.serve()
+```
+
+### Create a nested router
+
+```nim
+import asynchttpserver
+import express/context
+import express/routing/router
 
 var sub_router = Router()
 
@@ -43,8 +52,23 @@ sub_router.get("/users",
 )
 
 app.mount("/nice", sub_router)
+```
 
-app.serve()
+### Register a middleware
+
+```nim
+import asynchttpserver
+import express/context
+import express/handler
+
+proc SimpleAuthMiddleware(callback: Callback): Callback =
+    return proc (context: Context) =
+        if context.request.headers.hasKey("simple-auth"):
+            callback(context)
+        else:
+            context.Response(Http401, "")
+
+app.use(SimpleAuthMiddleware)
 ```
 
 
