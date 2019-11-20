@@ -43,6 +43,17 @@ suite "Integration tests":
         check(response.status == "405 Method Not Allowed")
         check(response.body == "")
 
+    test "Fail to pass an authentication middleware":
+        let response = client.get("http://localhost:8080/admins/")
+        check(response.status == "401 Unauthorized")
+        check(response.body == "")
+
+    test "Succeed to pass an authentication middleware":
+        client.headers = newHttpHeaders({ "simple-auth": "trust me" })
+        let response = client.get("http://localhost:8080/admins/")
+        check(response.status == "200 OK")
+        check(response.body == "Admins, he is doing it sideways !")
+
     # TODO: The process is still running even after being killed.
     process.kill()
     process.close()

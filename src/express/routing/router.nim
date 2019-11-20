@@ -52,8 +52,11 @@ proc mount*(self: var Router, path: string, router: Router) =
     if path.contains("*"):
         raise InvalidPathError(msg: "Cannot mount a sub-router on a wildcard route.")
 
+    let middlewares = router.get_middlewares()
+
     for sub_path, route in router.get_route_pairs():
-        self.routes.add(path & sub_path, route)
+        let compiled_route = route.apply(middlewares)
+        self.routes.add(path & sub_path, compiled_route)
 
 
 proc use*(self: Router, middleware: Middleware) =
