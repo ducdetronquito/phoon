@@ -76,3 +76,38 @@ suite "Tree":
 
         check(tree.retrieve("/").get() == "Gotta catch'em all!")
         check(tree.retrieve("/random-pokemon").get() == "Gotta catch'em all!")
+
+    test "Insert a route with a parameter":
+        var tree = new Tree[string]
+        tree.insert("/users/{id}", "Bobby")
+        let parameter_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        check(parameter_node.path == '{')
+        check(parameter_node.path_type == PathType.Parametrized)
+        check(parameter_node.parameter_name == "id")
+
+    test "Insert a route with two parameters":
+        var tree = new Tree[string]
+        tree.insert("/users/{id}/books/{title}", "Bobby")
+        let id = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        let books = id.children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        let title = books.children[0]
+        check(title.path == '{')
+        check(title.path_type == PathType.Parametrized)
+        check(title.parameter_name == "title")
+
+    test "Fail to insert a route with a parameter name that contains the character {":
+        var tree = new Tree[string]
+        doAssertRaises(InvalidPathError):
+            tree.insert("/users/{i{d}", "Bobby")
+
+    test "Fail to insert a route with a parameter name that does not start with the character {":
+        var tree = new Tree[string]
+        doAssertRaises(InvalidPathError):
+            tree.insert("/users/id}", "Bobby")
+
+    test "Fail to insert a parametrized route if one already exists":
+        var tree = new Tree[string]
+        tree.insert("/users/{id}", "1")
+
+        doAssertRaises(InvalidPathError):
+            tree.insert("/users/{name}", "Bobby")

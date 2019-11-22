@@ -6,24 +6,28 @@ import express/routing/errors
 type
     PathType* = enum
         Strict,
-        Wildcard
+        Wildcard,
+        Parametrized
 
     Node[T] = ref object
         path*: char
-        path_type*: PathType
         children*: seq[Node[T]]
         value*: Option[T]
         is_leaf: bool
+
+        case path_type*: PathType
+        of PathType.Parametrized:
+            parameter_name*: string
+        else:
+            discard
 
     Tree*[T] = ref object
         root*: Node[T]
 
 
 proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
-    var root = system.new(Node[T])
-    root.path = '~'
+    var root = Node[T](path: '~')
     return tree_type(root: root)
-
 
 
 proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
@@ -48,24 +52,56 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
     var current_node = self.root
 
+    var parameter_parsing_enabled: bool = false
+    var parameter_name: string
+
     for character in path:
+        var character: char = character
+        var path_type: PathType = PathType.Strict
+        # ----- Collect paramater name ----
+        if character == '{':
+            if not parameter_parsing_enabled:
+                parameter_parsing_enabled = true
+                continue
+            else:
+                raise InvalidPathError(msg: "Cannot define a route with a parameter name containing the character '{'.")
+
+        if character == '}':
+            if parameter_parsing_enabled:
+                parameter_parsing_enabled = false
+            else:
+                raise InvalidPathError(msg: "A parameter name in a route must start with a '{' character.")
+
+        if parameter_parsing_enabled:
+            parameter_name.add(character)
+            continue
+        # ---------------------------------
+
+        if parameter_name.len() > 0:
+            character = '{'
 
         let child = current_node.find_child_by_path(character)
         if child.isSome:
             current_node = child.get()
-            continue
+            if current_node.path_type == PathType.Parametrized and current_node.parameter_name != parameter_name:
+                raise InvalidPathError(msg : "You cannot define the same route with two different parameter names.")
+            else:
+                continue
 
-        var node = new Node[T]
-        node.path = character
+        var node: Node[T]
+        if parameter_name.len() > 0:
+            node = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name)
+            parameter_name = ""
+        elif character == '*':
+            node = Node[T](path: character, path_type: PathType.Wildcard)
+        else:
+            node = Node[T](path: character, path_type: PathType.Strict)
 
         current_node.children.add(node)
         current_node = node
 
     current_node.value = some(value)
     current_node.is_leaf = true
-
-    if current_node.path == '*':
-        current_node.path_type = PathType.Wildcard
 
 
 proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
@@ -85,6 +121,8 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
             of PathType.Wildcard:
                 wildcard_match = some(child)
                 match_found = true
+            of PathType.Parametrized:
+                continue
 
         if not match_found:
             if wildcard_match.isSome:
