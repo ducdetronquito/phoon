@@ -24,6 +24,9 @@ type
     Tree*[T] = ref object
         root*: Node[T]
 
+    Result*[T] = object
+        value*: T
+
 
 proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
     var root = Node[T](path: '~')
@@ -104,7 +107,7 @@ proc insert*[T](self: var Tree, path: string, value: T) =
     current_node.is_leaf = true
 
 
-proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
+proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
     var current_node = self.root
 
     var wildcard_match: Option[Node[T]]
@@ -126,13 +129,13 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[T] =
 
         if not match_found:
             if wildcard_match.isSome:
-                return some(wildcard_match.get().value.get())
+                return some(Result[T](value: wildcard_match.get().value.get()))
             else:
-                return none(T)
+                return none(Result[T])
 
     if current_node.is_leaf:
-        return some(current_node.value.get())
+        return some(Result[T](value: current_node.value.get()))
     elif wildcard_match.isSome:
-        return some(wildcard_match.get().value.get())
+        return some(Result[T](value: wildcard_match.get().value.get()))
     else:
-        return none(T)
+        return none(Result[T])

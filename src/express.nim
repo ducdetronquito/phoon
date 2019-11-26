@@ -49,7 +49,7 @@ proc dispatch*(self: App, context: Context) =
         context.Response(Http404, "")
         return
 
-    let route = potential_route.get()
+    let route = potential_route.get().value
     let callback = route.get_callback_of(context.request.reqMethod)
 
     if callback.isNone:

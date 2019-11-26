@@ -9,13 +9,14 @@ suite "Tree":
     test "Insert root route":
         var tree = Tree[string].new()
         tree.insert("/", "Home")
-        check(tree.retrieve("/").get() == "Home")
+        let result = tree.retrieve("/").get()
+        check(result.value == "Home")
 
     test "Insert route":
         var tree = Tree[string].new()
         tree.insert("/users", "Bobby")
-
-        check(tree.retrieve("/users").get() == "Bobby")
+        let result = tree.retrieve("/users").get()
+        check(result.value == "Bobby")
 
     test "Insert multiple routes":
         var tree = Tree[string].new()
@@ -24,21 +25,21 @@ suite "Tree":
         tree.insert("/users", "Bobby")
         tree.insert("/users/age", "42")
 
-        check(tree.retrieve("/").get() == "Home")
-        check(tree.retrieve("/users").get() == "Bobby")
-        check(tree.retrieve("/users/age").get() == "42")
+        check(tree.retrieve("/").get().value == "Home")
+        check(tree.retrieve("/users").get().value == "Bobby")
+        check(tree.retrieve("/users/age").get().value == "42")
 
     test "Fail to retrieve an undefined route.":
         var tree = Tree[string].new()
         tree.insert("/users", "Bobby")
-
-        check(tree.retrieve("/admins").isNone)
+        let result = tree.retrieve("/admins")
+        check(result.isNone)
 
     test "Fail to retrieve a partial route.":
         var tree = Tree[string].new()
         tree.insert("/users-that-are-nice", "Bobby")
-
-        check(tree.retrieve("/users").isNone)
+        let result = tree.retrieve("/users")
+        check(result.isNone)
 
     test "Insert a route with a wildcard":
         var tree = Tree[string].new()
@@ -58,14 +59,16 @@ suite "Tree":
         tree.insert("/users-that-are-grumpy", "Grumpy Cat")
         tree.insert("/users*", "Bobby")
 
-        check(tree.retrieve("/users-that-are-nice").get() == "Bobby")
+        let result = tree.retrieve("/users-that-are-nice").get()
+        check(result.value == "Bobby")
 
     test "Retrieve a wildcard route on partial match":
         var tree = Tree[string].new()
         tree.insert("/users-that-are-nice", "John")
         tree.insert("/*", "Bobby")
 
-        check(tree.retrieve("/users").get() == "Bobby")
+        let result = tree.retrieve("/users").get()
+        check(result.value == "Bobby")
 
     test "Retrieve a match-all route":
         var tree = Tree[string].new()
@@ -74,8 +77,8 @@ suite "Tree":
         tree.insert("/wind", "Charmander")
         tree.insert("/fire", "Pidgey")
 
-        check(tree.retrieve("/").get() == "Gotta catch'em all!")
-        check(tree.retrieve("/random-pokemon").get() == "Gotta catch'em all!")
+        check(tree.retrieve("/").get().value == "Gotta catch'em all!")
+        check(tree.retrieve("/random-pokemon").get().value == "Gotta catch'em all!")
 
     test "Insert a route with a parameter":
         var tree = new Tree[string]
