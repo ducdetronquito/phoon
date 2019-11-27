@@ -114,3 +114,15 @@ suite "Tree":
 
         doAssertRaises(InvalidPathError):
             tree.insert("/users/{name}", "Bobby")
+
+    test "Node children are prioratized":
+        var tree = new Tree[string]
+        tree.insert("/*", "wildcard")
+        tree.insert("/{id}", "parametrized")
+        tree.insert("/a", "strict")
+
+        let children = tree.root.children[0].children
+        check(children.len() == 3)
+        check(children[0].path_type == PathType.Strict)
+        check(children[1].path_type == PathType.Parametrized)
+        check(children[2].path_type == PathType.Wildcard)

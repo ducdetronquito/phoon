@@ -1,6 +1,7 @@
+import algorithm
+import express/routing/errors
 import options
 import strutils
-import express/routing/errors
 
 
 type
@@ -50,6 +51,23 @@ proc check_illegal_patterns(path: string) =
         raise InvalidPathError(msg: "A path cannot defined character after a wildcard.")
 
 
+proc by_path_type_order[T](x: Node[T], y: Node[T]): int =
+    # Comparison function to order nodes by prioritizing path types as follow:
+    # strict, parametrized and wildcard.
+    if y.path == '*':
+        return -1
+
+    if x.path != '*' and y.path == '{':
+        return -1
+
+    return 1
+
+
+proc add_children[T](self: var Tree[T], parent: var Node[T], child: Node[T]) =
+    parent.children.add(child)
+    parent.children.sort(by_path_type_order[T])
+
+
 proc insert*[T](self: var Tree, path: string, value: T) =
     path.check_illegal_patterns()
 
@@ -83,25 +101,25 @@ proc insert*[T](self: var Tree, path: string, value: T) =
         if parameter_name.len() > 0:
             character = '{'
 
-        let child = current_node.find_child_by_path(character)
-        if child.isSome:
-            current_node = child.get()
+        let matching_node = current_node.find_child_by_path(character)
+        if matching_node.isSome:
+            current_node = matching_node.get()
             if current_node.path_type == PathType.Parametrized and current_node.parameter_name != parameter_name:
                 raise InvalidPathError(msg : "You cannot define the same route with two different parameter names.")
             else:
                 continue
 
-        var node: Node[T]
+        var child: Node[T]
         if parameter_name.len() > 0:
-            node = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name)
+            child = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name)
             parameter_name = ""
         elif character == '*':
-            node = Node[T](path: character, path_type: PathType.Wildcard)
+            child = Node[T](path: character, path_type: PathType.Wildcard)
         else:
-            node = Node[T](path: character, path_type: PathType.Strict)
+            child = Node[T](path: character, path_type: PathType.Strict)
 
-        current_node.children.add(node)
-        current_node = node
+        self.add_children(current_node, child)
+        current_node = child
 
     current_node.value = some(value)
     current_node.is_leaf = true
