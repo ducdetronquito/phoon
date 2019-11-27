@@ -2,6 +2,7 @@ import algorithm
 import express/routing/errors
 import options
 import strutils
+import tables
 
 
 type
@@ -27,6 +28,7 @@ type
 
     Result*[T] = object
         value*: T
+        parameters*: TableRef[string, string]
 
 
 proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
@@ -127,33 +129,46 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
 proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
     var current_node = self.root
-
+    var parameters = new TableRef[string, string]
     var wildcard_match: Option[Node[T]]
 
-    for character in path:
+    var i = -1
+    while i < path.len() - 1:
+        i = i + 1
         var match_found = false
 
         for child in current_node.children:
             case child.path_type
             of PathType.Strict:
-                if child.path == character:
+                if child.path == path[i]:
                     current_node = child
                     match_found = true
             of PathType.Wildcard:
                 wildcard_match = some(child)
                 match_found = true
             of PathType.Parametrized:
-                continue
+                var parameter = ""
+                while i < path.len() and path[i] != '/':
+                    parameter.add(path[i])
+                    i = i + 1
+                parameters.add(child.parameter_name, parameter)
+
+                # Make sure the / is re-evaluated
+                if i < path.len() and path[i] == '/':
+                    i = i - 1
+
+                current_node = child
+                match_found = true
 
         if not match_found:
             if wildcard_match.isSome:
-                return some(Result[T](value: wildcard_match.get().value.get()))
+                return some(Result[T](value: wildcard_match.get().value.get(), parameters: parameters))
             else:
                 return none(Result[T])
 
     if current_node.is_leaf:
-        return some(Result[T](value: current_node.value.get()))
+        return some(Result[T](value: current_node.value.get(), parameters: parameters))
     elif wildcard_match.isSome:
-        return some(Result[T](value: wildcard_match.get().value.get()))
+        return some(Result[T](value: wildcard_match.get().value.get(), parameters: parameters))
     else:
         return none(Result[T])

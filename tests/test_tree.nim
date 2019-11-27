@@ -1,10 +1,26 @@
-import options
 import express/routing/errors
 import express/routing/tree
+import options
+import tables
 import unittest
 
 
 suite "Tree":
+
+    test "Node children are prioratized":
+        var tree = new Tree[string]
+        tree.insert("/*", "wildcard")
+        tree.insert("/{id}", "parametrized")
+        tree.insert("/a", "strict")
+
+        let children = tree.root.children[0].children
+        check(children.len() == 3)
+        check(children[0].path_type == PathType.Strict)
+        check(children[1].path_type == PathType.Parametrized)
+        check(children[2].path_type == PathType.Wildcard)
+
+
+suite "Strict routes":
 
     test "Insert root route":
         var tree = Tree[string].new()
@@ -40,6 +56,9 @@ suite "Tree":
         tree.insert("/users-that-are-nice", "Bobby")
         let result = tree.retrieve("/users")
         check(result.isNone)
+
+
+suite "Wilcard routes":
 
     test "Insert a route with a wildcard":
         var tree = Tree[string].new()
@@ -80,6 +99,42 @@ suite "Tree":
         check(tree.retrieve("/").get().value == "Gotta catch'em all!")
         check(tree.retrieve("/random-pokemon").get().value == "Gotta catch'em all!")
 
+
+suite "Parametrized routes":
+
+    test "Retrieve a route with a parameter":
+        var tree = Tree[string].new()
+        tree.insert("/users/{id}", "Bobby")
+
+        let result = tree.retrieve("/users/10").get()
+        check(result.value == "Bobby")
+        check(result.parameters["id"] == "10")
+
+    test "Retrieve a route with a parameter followed by a strict path":
+        var tree = Tree[string].new()
+        tree.insert("/users/{id}/books", "Bobby")
+
+        let result = tree.retrieve("/users/10/books").get()
+        check(result.value == "Bobby")
+        check(result.parameters["id"] == "10")
+
+    test "Retrieve a route with a parameter followed by a wildcard path":
+        var tree = Tree[string].new()
+        tree.insert("/users/{id}/boo*", "A boo")
+
+        let result = tree.retrieve("/users/10/booking").get()
+        check(result.value == "A boo")
+        check(result.parameters["id"] == "10")
+
+    test "Retrieve a route with two parameters":
+        var tree = Tree[string].new()
+        tree.insert("/users/{id}/books/{title}", "A book title")
+
+        let result = tree.retrieve("/users/10/books/the-capital").get()
+        check(result.value == "A book title")
+        check(result.parameters["id"] == "10")
+        check(result.parameters["title"] == "the-capital")
+
     test "Insert a route with a parameter":
         var tree = new Tree[string]
         tree.insert("/users/{id}", "Bobby")
@@ -114,15 +169,3 @@ suite "Tree":
 
         doAssertRaises(InvalidPathError):
             tree.insert("/users/{name}", "Bobby")
-
-    test "Node children are prioratized":
-        var tree = new Tree[string]
-        tree.insert("/*", "wildcard")
-        tree.insert("/{id}", "parametrized")
-        tree.insert("/a", "strict")
-
-        let children = tree.root.children[0].children
-        check(children.len() == 3)
-        check(children[0].path_type == PathType.Strict)
-        check(children[1].path_type == PathType.Parametrized)
-        check(children[2].path_type == PathType.Wildcard)
