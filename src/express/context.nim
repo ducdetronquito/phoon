@@ -1,11 +1,12 @@
 import asynchttpserver
 import response
-
+import tables
 
 type
     Context* = ref object
         request*: Request
         response*: Response
+        parameters*: TableRef[string, string]
 
 
 proc from_request*(context_type: type[Context], request: Request): Context =

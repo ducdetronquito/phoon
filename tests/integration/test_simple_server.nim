@@ -10,8 +10,7 @@ suite "Integration tests":
         options={ProcessOption.poUsePath}
     )
 
-    setup:
-        var client = newHttpClient()
+    var client = newHttpClient()
 
     test "Get request":
         let response = client.get("http://localhost:8080/")
@@ -27,6 +26,11 @@ suite "Integration tests":
         let response = client.get("http://localhost:8080/abstract")
         check(response.status == "200 OK")
         check(response.body == "I am a wildard page !")
+    
+    test "Get request on a parametrized endpoint":
+        let response = client.get("http://localhost:8080/books/how-to-poop-in-the-wood")
+        check(response.status == "200 OK")
+        check(response.body == "Of course I read 'how-to-poop-in-the-wood' !")
 
     test "Post request":
         let response = client.post("http://localhost:8080/about")
