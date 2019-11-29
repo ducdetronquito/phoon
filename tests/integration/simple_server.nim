@@ -3,7 +3,7 @@ import express
 import express/handler
 import express/context
 import express/routing/router
-
+import tables
 
 var app = new App
 
@@ -20,6 +20,13 @@ app.post("/about",
 app.get("/ab*",
     proc (context: Context) =
         context.Response(Http200, "I am a wildard page !")
+)
+
+
+app.get("/books/{title}",
+    proc (context: Context) =
+        var book_title = context.parameters["title"]
+        context.Response(Http200, "Of course I read '" & book_title & "' !")
 )
 
 
