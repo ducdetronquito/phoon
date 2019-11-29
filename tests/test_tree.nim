@@ -1,7 +1,6 @@
 import express/routing/errors
 import express/routing/tree
 import options
-import tables
 import unittest
 
 
@@ -18,6 +17,14 @@ suite "Tree":
         check(children[0].path_type == PathType.Strict)
         check(children[1].path_type == PathType.Parametrized)
         check(children[2].path_type == PathType.Wildcard)
+
+    test "A leaf node knows it's available parameters":
+        var tree = new Tree[string]
+        tree.insert("/{api_version}/users/{id}", "Bobby")
+
+        let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        check(last_node.is_leaf == true)
+        check(last_node.parameters == ["api_version", "id"])
 
 
 suite "Strict routes":
@@ -108,7 +115,7 @@ suite "Parametrized routes":
 
         let result = tree.retrieve("/users/10").get()
         check(result.value == "Bobby")
-        check(result.parameters["id"] == "10")
+        check(result.parameters.get("id") == "10")
 
     test "Retrieve a route with a parameter followed by a strict path":
         var tree = Tree[string].new()
@@ -116,7 +123,7 @@ suite "Parametrized routes":
 
         let result = tree.retrieve("/users/10/books").get()
         check(result.value == "Bobby")
-        check(result.parameters["id"] == "10")
+        check(result.parameters.get("id") == "10")
 
     test "Retrieve a route with a parameter followed by a wildcard path":
         var tree = Tree[string].new()
@@ -124,7 +131,7 @@ suite "Parametrized routes":
 
         let result = tree.retrieve("/users/10/booking").get()
         check(result.value == "A boo")
-        check(result.parameters["id"] == "10")
+        check(result.parameters.get("id") == "10")
 
     test "Retrieve a route with two parameters":
         var tree = Tree[string].new()
@@ -132,8 +139,8 @@ suite "Parametrized routes":
 
         let result = tree.retrieve("/users/10/books/the-capital").get()
         check(result.value == "A book title")
-        check(result.parameters["id"] == "10")
-        check(result.parameters["title"] == "the-capital")
+        check(result.parameters.get("id") == "10")
+        check(result.parameters.get("title") == "the-capital")
 
     test "Insert a route with a parameter":
         var tree = new Tree[string]
@@ -142,6 +149,7 @@ suite "Parametrized routes":
         check(parameter_node.path == '{')
         check(parameter_node.path_type == PathType.Parametrized)
         check(parameter_node.parameter_name == "id")
+        check(parameter_node.parameters == ["id"])
 
     test "Insert a route with two parameters":
         var tree = new Tree[string]
@@ -152,6 +160,7 @@ suite "Parametrized routes":
         check(title.path == '{')
         check(title.path_type == PathType.Parametrized)
         check(title.parameter_name == "title")
+        check(title.parameters == ["id", "title"])
 
     test "Fail to insert a route with a parameter name that contains the character {":
         var tree = new Tree[string]
