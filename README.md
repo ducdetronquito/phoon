@@ -12,10 +12,12 @@ A toy Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/),
 Nota Bene: *Express is in its early stage, so every of its aspects is subject to changes* 🌪️
 
 ### Create an application:
+
 ```nim
 import asynchttpserver
 import express
 import express/context
+import tables
 
 var app = new App
 
@@ -32,6 +34,12 @@ app.post("/users",
 app.get("/us*",
     proc (context: Context) =
         context.Response(Http200, "Every URL starting with 'us' falls back here.")
+)
+
+app.get("/books/{title}",
+    proc (context: Context) =
+        var book_title = context.parameters["title"]
+        context.Response(Http200, "Of course I read '" & book_title & "' !")
 )
 
 app.serve()
