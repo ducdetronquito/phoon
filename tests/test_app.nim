@@ -1,9 +1,5 @@
 import asynchttpserver
 import express
-import express/context
-import express/handler
-import express/routing/errors
-import express/routing/router
 import unittest
 import utils
 

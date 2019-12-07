@@ -1,10 +1,7 @@
 import asynchttpserver
 import asyncdispatch
-import express/context
-import express/handler
-import express/routing/route
-import express/routing/router
-import express/routing/tree
+import express/[context, handler]
+import express/routing/[errors, route, router, tree]
 import options
 
 
@@ -77,3 +74,11 @@ proc serve*(self: App) =
 
     let server = newAsyncHttpServer()
     waitFor server.serve(Port(8080), main_dispatch)
+
+
+export context
+export errors
+export handler
+export route
+export router
+export tree
