@@ -16,7 +16,6 @@ Nota Bene: *Express is in its early stage, so every of its aspects is subject to
 ```nim
 import asynchttpserver
 import express
-import tables
 
 var app = new App
 
@@ -37,7 +36,7 @@ app.get("/us*",
 
 app.get("/books/{title}",
     proc (context: Context) =
-        var book_title = context.parameters["title"]
+        var book_title = context.parameters.get("title")
         context.Response(Http200, "Of course I read '" & book_title & "' !")
 )
 
