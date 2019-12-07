@@ -16,7 +16,6 @@ Nota Bene: *Express is in its early stage, so every of its aspects is subject to
 ```nim
 import asynchttpserver
 import express
-import express/context
 import tables
 
 var app = new App
@@ -49,8 +48,7 @@ app.serve()
 
 ```nim
 import asynchttpserver
-import express/context
-import express/routing/router
+import express
 
 var sub_router = Router()
 
@@ -66,8 +64,7 @@ app.mount("/nice", sub_router)
 
 ```nim
 import asynchttpserver
-import express/context
-import express/handler
+import express
 
 proc SimpleAuthMiddleware(callback: Callback): Callback =
     return proc (context: Context) =
