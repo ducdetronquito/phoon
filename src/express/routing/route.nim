@@ -1,5 +1,5 @@
 import asynchttpserver
-import express/handler
+import ../handler
 import options
 
 

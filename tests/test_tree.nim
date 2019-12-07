@@ -1,5 +1,4 @@
-import express/routing/errors
-import express/routing/tree
+import express/routing/[errors, tree]
 import options
 import unittest
 
