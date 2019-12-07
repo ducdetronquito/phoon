@@ -1,12 +1,12 @@
 import asynchttpserver
 import response
-import tables
+import express/routing/tree
 
 type
     Context* = ref object
         request*: Request
         response*: Response
-        parameters*: TableRef[string, string]
+        parameters*: Parameters
 
 
 proc from_request*(context_type: type[Context], request: Request): Context =

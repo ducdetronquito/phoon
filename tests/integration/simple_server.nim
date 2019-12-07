@@ -3,7 +3,7 @@ import express
 import express/handler
 import express/context
 import express/routing/router
-import tables
+import express/routing/tree
 
 var app = new App
 
@@ -25,7 +25,7 @@ app.get("/ab*",
 
 app.get("/books/{title}",
     proc (context: Context) =
-        var book_title = context.parameters["title"]
+        var book_title = context.parameters.get("title")
         context.Response(Http200, "Of course I read '" & book_title & "' !")
 )
 

@@ -15,7 +15,6 @@ type
         path*: char
         children*: seq[Node[T]]
         value*: Option[T]
-        is_leaf: bool
 
         case path_type*: PathType
         of PathType.Parametrized:
@@ -23,12 +22,37 @@ type
         else:
             discard
 
+        case is_leaf*: bool
+        of true:
+            parameters*: seq[string]
+        of false:
+            discard
+
     Tree*[T] = ref object
         root*: Node[T]
 
+    Parameters* = ref object
+        data: Table[string, string]
+
     Result*[T] = object
-        value*: T
-        parameters*: TableRef[string, string]
+            value*: T
+            parameters*: Parameters
+
+
+proc from_keys(table: type[Parameters], keys: seq[string], values: seq[string]): Parameters =
+    result = Parameters()
+
+    for index, key in keys:
+        result.data[key] = values[index]
+
+    return result
+
+proc get*(self: Parameters, name: string): string =
+    return self.data[name]
+
+
+proc contains*(self: Parameters, name: string): bool =
+    return self.data.hasKey(name)
 
 
 proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
@@ -74,11 +98,11 @@ proc insert*[T](self: var Tree, path: string, value: T) =
     path.check_illegal_patterns()
 
     var current_node = self.root
-
     var parameter_parsing_enabled: bool = false
     var parameter_name: string
+    var parameters: seq[string]
 
-    for character in path:
+    for index, character in path:
         var character: char = character
         var path_type: PathType = PathType.Strict
         # ----- Collect paramater name ----
@@ -92,6 +116,7 @@ proc insert*[T](self: var Tree, path: string, value: T) =
         if character == '}':
             if parameter_parsing_enabled:
                 parameter_parsing_enabled = false
+                parameters.add(parameter_name)
             else:
                 raise InvalidPathError(msg: "A parameter name in a route must start with a '{' character.")
 
@@ -112,24 +137,33 @@ proc insert*[T](self: var Tree, path: string, value: T) =
                 continue
 
         var child: Node[T]
+        let is_last_character = index == path.len() - 1
         if parameter_name.len() > 0:
-            child = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name)
+            if is_last_character:
+                child = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name, is_leaf: true, parameters: parameters)
+            else:
+                child = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name)
             parameter_name = ""
         elif character == '*':
-            child = Node[T](path: character, path_type: PathType.Wildcard)
+            if is_last_character:
+                child = Node[T](path: character, path_type: PathType.Wildcard, is_leaf: true, parameters: parameters)
+            else:
+                child = Node[T](path: character, path_type: PathType.Wildcard)
         else:
-            child = Node[T](path: character, path_type: PathType.Strict)
+            if is_last_character:
+                child = Node[T](path: character, path_type: PathType.Strict, is_leaf: true, parameters: parameters)
+            else:
+                child = Node[T](path: character, path_type: PathType.Strict)
 
         self.add_children(current_node, child)
         current_node = child
 
     current_node.value = some(value)
-    current_node.is_leaf = true
 
 
 proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
     var current_node = self.root
-    var parameters = new TableRef[string, string]
+    var parameters_values: seq[string]
     var wildcard_match: Option[Node[T]]
 
     var i = -1
@@ -151,7 +185,7 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
                 while i < path.len() and path[i] != '/':
                     parameter.add(path[i])
                     i = i + 1
-                parameters.add(child.parameter_name, parameter)
+                parameters_values.add(parameter)
 
                 # Make sure the / is re-evaluated
                 if i < path.len() and path[i] == '/':
@@ -162,13 +196,30 @@ proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
 
         if not match_found:
             if wildcard_match.isSome:
-                return some(Result[T](value: wildcard_match.get().value.get(), parameters: parameters))
+                let node = wildcard_match.get()
+                return some(
+                    Result[T](
+                        value: node.value.get(),
+                        parameters: Parameters.from_keys(node.parameters, parameters_values)
+                    )
+                )
             else:
                 return none(Result[T])
 
     if current_node.is_leaf:
-        return some(Result[T](value: current_node.value.get(), parameters: parameters))
+        return some(
+            Result[T](
+                value: current_node.value.get(),
+                parameters: Parameters.from_keys(current_node.parameters, parameters_values)
+            )
+        )
     elif wildcard_match.isSome:
-        return some(Result[T](value: wildcard_match.get().value.get(), parameters: parameters))
+        let node = wildcard_match.get()
+        return some(
+            Result[T](
+                value: node.value.get(),
+                parameters: Parameters.from_keys(node.parameters, parameters_values)
+            )
+        )
     else:
         return none(Result[T])
