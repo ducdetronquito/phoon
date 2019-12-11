@@ -7,7 +7,7 @@ import utils
 suite "Endpoints":
     
     test "GET endpoint":
-        var context = Context.from_request(GetRequest("https://yumad.bro/"))
+        var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.get("/",
             proc (context: Context) =
@@ -19,7 +19,7 @@ suite "Endpoints":
         check(context.response.body == "I am a boring home page")
 
     test "POST endpoint":
-        var context = Context.from_request(PostRequest("https://yumad.bro/"))
+        var context = Context(request: PostRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
             proc (context: Context) =
@@ -31,7 +31,7 @@ suite "Endpoints":
         check(context.response.body == "I super JSON payloard")
 
     test "Can GET a endpoint already defined to handle POST requests":
-        var context = Context.from_request(GetRequest("https://yumad.bro/memes"))
+        var context = Context(request: GetRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.post("/memes",
             proc (context: Context) =
@@ -46,7 +46,7 @@ suite "Endpoints":
         check(context.response.status_code == Http200)
 
     test "Can POST a endpoint already defined to handle GET requests":
-        var context = Context.from_request(PostRequest("https://yumad.bro/memes"))
+        var context = Context(request: PostRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.get("/memes",
             proc (context: Context) =
@@ -61,7 +61,7 @@ suite "Endpoints":
         check(context.response.status_code == Http201)
 
     test "Not found endpoint returns a 404 status code.":
-        var context = Context.from_request(GetRequest("https://yumad.bro/an-undefined-url"))
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
         var app = App.new()
         app.get("/",
             proc (context: Context) =
@@ -72,7 +72,7 @@ suite "Endpoints":
         check(context.response.status_code == Http404)
 
     test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
-        var context = Context.from_request(GetRequest("https://yumad.bro/"))
+        var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
             proc (context: Context) =
@@ -83,7 +83,7 @@ suite "Endpoints":
         check(context.response.status_code == Http405)
 
     test "Can define a nested router":
-        var context = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
+        var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()
 
         var router = Router.new()
@@ -100,7 +100,7 @@ suite "Endpoints":
         check(context.response.body == "Some nice users")
 
     test "Cannot define a nested router on a wildcard route":
-        var context = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
+        var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()
 
         var router = Router.new()
@@ -113,7 +113,7 @@ suite "Endpoints":
             app.mount("/api/*", router)
 
     test "Can register a middleware":
-        var context = Context.from_request(GetRequest("https://yumad.bro/"))
+        var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
 
         app.get("/",
@@ -136,7 +136,7 @@ suite "Endpoints":
         check(context.response.status_code == Http418)
 
     test "Can register a middleware on a sub-router":
-        var context = Context.from_request(GetRequest("https://yumad.bro/users/"))
+        var context = Context(request: GetRequest("https://yumad.bro/users/"))
         var app = App.new()
 
         var router = Router.new()

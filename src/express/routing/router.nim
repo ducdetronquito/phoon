@@ -11,19 +11,12 @@ type
         middlewares: seq[Middleware]
 
 
-proc new*(router_type: type[Router]): Router =
-    var router = system.new(Router)
-    return router
-
-
 proc get*(self: var Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].get_callback = some(callback)
         return
 
-    var route = new Route
-    route.get_callback = some(callback)
-    route.post_callback = none(Callback)
+    var route = Route(get_callback: some(callback), post_callback: none(Callback))
     self.routes.add(path, route)
 
 
@@ -32,9 +25,7 @@ proc post*(self: var Router, path: string, callback: Callback) =
         self.routes[path].post_callback = some(callback)
         return
 
-    var route = new Route
-    route.get_callback = none(Callback)
-    route.post_callback = some(callback)
+    var route = Route(get_callback: none(Callback), post_callback: some(callback))
     self.routes.add(path, route)
 
 

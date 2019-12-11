@@ -12,10 +12,7 @@ type
 
 
 proc new*(app_type: type[App]): App =
-    var app = system.new(App)
-    app.router = Router.new()
-    app.routing_table = Tree[Route].new()
-    return app
+    return App(router: Router(), routing_table: new Tree[Route])
 
 
 proc get*(self: var App, path: string, callback: Callback) =
@@ -67,8 +64,7 @@ proc serve*(self: App) =
     app.compile_routes()
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        var context = new Context
-        context.request = request
+        var context = Context(request: request)
         app.dispatch(context)
         await request.respond(context.response.status_code, context.response.body)
 

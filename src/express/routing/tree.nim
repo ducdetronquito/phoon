@@ -234,7 +234,7 @@ proc match[T](self: Node[T], context: var LookupContext[T]): bool =
 
 
 proc match*[T](self: Tree[T], path: string): Option[Result[T]] =
-    var nodes_to_visit = @[self.root.children[0]] # TODO: Make root hold the "/" on insert
+    var nodes_to_visit = @[self.root.children[0]]
     var current_node: Node[T]
 
     var context = LookupContext[T](path: path, current_path_index: 0)
