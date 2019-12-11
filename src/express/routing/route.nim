@@ -1,21 +1,37 @@
 import asynchttpserver
-import ../handler
+import ../context
 import options
 
 
 type
+    Callback* = proc(context: Context)
+
+    Middleware* = proc (callback: Callback): Callback
+
     Route* = ref object
         get_callback*: Option[Callback]
         post_callback*: Option[Callback]
 
 
 proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
-    if http_method == HttpMethod.HttpGet:
+    case http_method
+    of HttpMethod.HttpGet:
         return route.get_callback
-    elif http_method == HttpMethod.HttpPost:
+    of HttpMethod.HttpPost:
         return route.post_callback
     else:
         return none(Callback)
+
+
+proc apply*(self: Callback, middlewares: seq[Middleware]): Callback =
+    if middlewares.len() == 0:
+        return self
+
+    result = self
+    for middleware in middlewares:
+        result = middleware(result)
+
+    return result
 
 
 proc apply*(self: Route, middlewares: seq[Middleware]): Route =

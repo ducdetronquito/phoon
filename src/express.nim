@@ -1,6 +1,6 @@
 import asynchttpserver
 import asyncdispatch
-import express/[context, handler]
+import express/context
 import express/routing/[errors, route, router, tree]
 import options
 
@@ -78,7 +78,5 @@ proc serve*(self: App) =
 
 export context
 export errors
-export handler
 export route
 export router
-export tree

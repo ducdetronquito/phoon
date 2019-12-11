@@ -1,5 +1,4 @@
 import errors
-import ../handler
 import options
 import route
 import strutils
