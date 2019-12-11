@@ -60,6 +60,46 @@ proc new*[T](tree_type: type[Tree[T]]): Tree[T] =
     return tree_type(root: root)
 
 
+proc to_diagram*[T](self: Tree[T]): string =
+    # Display a tree for debugging purposes
+    #
+    # Example:
+    # For a tree defined with the 3 following routes:
+    # - /a
+    # - /bc
+    # - /d
+    #
+    # It outputs a corresponding diagram where ★ describe leaf nodes:
+    #   +- /
+    #      +- a★
+    #      +- b
+    #         +- d★
+    #      +- d★
+
+    proc to_diagram[T](self: Node[T], indentation: string = "", is_last_children: bool = true): string =
+        result = ""
+
+        var indentation = deepCopy(indentation)
+        var row = indentation & "+- " & self.path
+        if self.is_leaf:
+            row.add("★")
+
+        result.add(row & "\n")
+
+        if is_last_children:
+            indentation.add("   ")
+        else:
+            indentation.add("|  ")
+
+        for index, child in self.children:
+            let child_diagram = child.to_diagram(indentation, index == self.children.len() - 1)
+            result.add(child_diagram)
+
+        return result
+
+    return self.root.to_diagram()
+
+
 proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
     for child in self.children:
         if child.path == path:
