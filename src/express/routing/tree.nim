@@ -119,14 +119,14 @@ proc check_illegal_patterns(path: string) =
 
 proc by_path_type_order[T](x: Node[T], y: Node[T]): int =
     # Comparison function to order nodes by prioritizing path types as follow:
-    # strict, parametrized and wildcard.
+    # wildcard, parametrized and strict.
     if y.path == '*':
-        return -1
+        return 1
 
     if x.path != '*' and y.path == '{':
-        return -1
+        return 1
 
-    return 1
+    return -1
 
 
 proc add_children[T](self: var Tree[T], parent: var Node[T], child: Node[T]) =
@@ -201,65 +201,63 @@ proc insert*[T](self: var Tree, path: string, value: T) =
     current_node.value = some(value)
 
 
-proc retrieve*[T](self: var Tree[T], path: string): Option[Result[T]] =
-    var current_node = self.root
-    var parameters_values: seq[string]
-    var wildcard_match: Option[Node[T]]
+type
+    LookupContext[T] = ref object
+        path: string
+        current_path_index: int
+        potential_matches: seq[Node[T]]
+        collected_parameters: seq[string]
 
-    var i = -1
-    while i < path.len() - 1:
-        i = i + 1
-        var match_found = false
 
-        for child in current_node.children:
-            case child.path_type
-            of PathType.Strict:
-                if child.path == path[i]:
-                    current_node = child
-                    match_found = true
-            of PathType.Wildcard:
-                wildcard_match = some(child)
-                match_found = true
-            of PathType.Parametrized:
-                var parameter = ""
-                while i < path.len() and path[i] != '/':
-                    parameter.add(path[i])
-                    i = i + 1
-                parameters_values.add(parameter)
+proc path_is_fully_parsed[T](self: LookupContext[T]): bool =
+    return self.path.len() == self.current_path_index
 
-                # Make sure the / is re-evaluated
-                if i < path.len() and path[i] == '/':
-                    i = i - 1
 
-                current_node = child
-                match_found = true
+proc match[T](self: Node[T], context: var LookupContext[T]): bool =
+    case self.path_type:
+    of PathType.Strict:
+        if self.path == context.path[context.current_path_index]:
+            context.current_path_index += 1
+            return true
+    of PathType.Wildcard:
+        context.current_path_index = context.path.len()
+        return true
+    of PathType.Parametrized:
+        var parameter = ""
+        while context.current_path_index < context.path.len() and context.path[context.current_path_index] != '/':
+            parameter.add(context.path[context.current_path_index])
+            context.current_path_index += 1
+        context.collected_parameters.add(parameter)
+        return true
 
-        if not match_found:
-            if wildcard_match.isSome:
-                let node = wildcard_match.get()
+    return false
+
+
+proc match*[T](self: Tree[T], path: string): Option[Result[T]] =
+    var nodes_to_visit = @[self.root.children[0]] # TODO: Make root hold the "/" on insert
+    var current_node: Node[T]
+
+    var context = LookupContext[T](path: path, current_path_index: 0)
+
+    while nodes_to_visit.len() > 0:
+        current_node = nodes_to_visit.pop()
+        let matched = current_node.match(context)
+        if not matched:
+            continue
+
+        if context.path_is_fully_parsed():
+            if current_node.is_leaf:
                 return some(
                     Result[T](
-                        value: node.value.get(),
-                        parameters: Parameters.from_keys(node.parameters, parameters_values)
+                        value: current_node.value.get(),
+                        parameters: Parameters.from_keys(current_node.parameters, context.collected_parameters)
                     )
                 )
             else:
                 return none(Result[T])
+        else:
+            for child in current_node.children:
+                nodes_to_visit.add(child)
+            continue
 
-    if current_node.is_leaf:
-        return some(
-            Result[T](
-                value: current_node.value.get(),
-                parameters: Parameters.from_keys(current_node.parameters, parameters_values)
-            )
-        )
-    elif wildcard_match.isSome:
-        let node = wildcard_match.get()
-        return some(
-            Result[T](
-                value: node.value.get(),
-                parameters: Parameters.from_keys(node.parameters, parameters_values)
-            )
-        )
-    else:
-        return none(Result[T])
+    return none(Result[T])

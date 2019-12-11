@@ -41,7 +41,7 @@ proc compile_routes*(self: var App) =
 proc dispatch*(self: App, context: Context) =
     let path = context.request.url.path
 
-    let potential_result = self.routing_table.retrieve(path)
+    let potential_result = self.routing_table.match(path)
     if potential_result.isNone:
         context.Response(Http404, "")
         return
