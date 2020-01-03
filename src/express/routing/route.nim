@@ -1,10 +1,11 @@
+import asyncdispatch
 import asynchttpserver
 import ../context
 import options
 
 
 type
-    Callback* = proc(context: Context)
+    Callback* = proc(context: Context): Future[void]
 
     Middleware* = proc (callback: Callback): Callback
 

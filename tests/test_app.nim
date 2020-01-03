@@ -1,3 +1,4 @@
+import asyncdispatch
 import asynchttpserver
 import express
 import unittest
@@ -10,7 +11,7 @@ suite "Endpoints":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.get("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "I am a boring home page")
         )
         app.compile_routes()
@@ -22,7 +23,7 @@ suite "Endpoints":
         var context = Context(request: PostRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http201, "I super JSON payloard")
         )
         app.compile_routes()
@@ -34,11 +35,11 @@ suite "Endpoints":
         var context = Context(request: GetRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.post("/memes",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http201, "Create a meme")
         )
         app.get("/memes",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "Retrieve all the good memes")
         )
         app.compile_routes()
@@ -49,11 +50,11 @@ suite "Endpoints":
         var context = Context(request: PostRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.get("/memes",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "Retrieve all the good memes")
         )
         app.post("/memes",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http201, "Create a meme")
         )
         app.compile_routes()
@@ -64,7 +65,7 @@ suite "Endpoints":
         var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
         var app = App.new()
         app.get("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "I am a boring home page")
         )
         app.compile_routes()
@@ -75,7 +76,7 @@ suite "Endpoints":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "I am a boring home page")
         )
         app.compile_routes()
@@ -88,7 +89,7 @@ suite "Endpoints":
 
         var router = Router.new()
         router.get("/users",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "Some nice users")
         )
 
@@ -105,7 +106,7 @@ suite "Endpoints":
 
         var router = Router.new()
         router.get("/users",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "Some nice users")
         )
 
@@ -117,16 +118,16 @@ suite "Endpoints":
         var app = App.new()
 
         app.get("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "I am a boring home page")
         )
 
         proc TeapotMiddleware(callback: Callback): Callback =
-            return proc (context: Context) =
+            return proc (context: Context) {.async.} =
                 if context.request.url.path != "teapot":
                     context.Response(Http418, "")
                     return
-                callback(context)
+                await callback(context)
 
         app.use(TeapotMiddleware)
 
@@ -141,16 +142,16 @@ suite "Endpoints":
 
         var router = Router.new()
         router.get("/",
-            proc (context: Context) =
+            proc (context: Context) {.async.} =
                 context.Response(Http200, "I am a boring home page")
         )
 
         proc TeapotMiddleware(callback: Callback): Callback =
-            return proc (context: Context) =
+            return proc (context: Context) {.async.} =
                 if context.request.url.path != "teapot":
                     context.Response(Http418, "")
                     return
-                callback(context)
+                await callback(context)
 
         router.use(TeapotMiddleware)
         app.mount("/users", router)

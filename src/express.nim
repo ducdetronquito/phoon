@@ -35,24 +35,24 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, compile_route)
 
 
-proc dispatch*(self: App, context: Context) =
+proc dispatch*(self: App, context: Context) {.async, discardable.} =
     let path = context.request.url.path
 
-    let potential_result = self.routing_table.match(path)
-    if potential_result.isNone:
+    let potential_match = self.routing_table.match(path)
+    if potential_match.isNone:
         context.Response(Http404, "")
         return
 
-    let result = potential_result.get()
-    let route = result.value
+    let match = potential_match.get()
+    let route = match.value
     let callback = route.get_callback_of(context.request.reqMethod)
     if callback.isNone:
         context.Response(Http405, "")
         return
 
-    context.parameters = result.parameters
+    context.parameters = match.parameters
     {.gcsafe.}:
-        callback.get()(context)
+        await callback.get()(context)
 
 
 proc use*(self: App, middleware: Middleware) =
@@ -65,7 +65,7 @@ proc serve*(self: App) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = Context(request: request)
-        app.dispatch(context)
+        await app.dispatch(context)
         await request.respond(context.response.status_code, context.response.body)
 
     let server = newAsyncHttpServer()
@@ -76,3 +76,4 @@ export context
 export errors
 export route
 export router
+export tree
