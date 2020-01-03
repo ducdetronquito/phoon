@@ -35,7 +35,7 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, compile_route)
 
 
-proc dispatch*(self: App, context: Context) =
+proc dispatch*(self: App, context: Context) {.async, discardable.} =
     let path = context.request.url.path
 
     let potential_result = self.routing_table.match(path)
@@ -52,7 +52,7 @@ proc dispatch*(self: App, context: Context) =
 
     context.parameters = result.parameters
     {.gcsafe.}:
-        callback.get()(context)
+        await callback.get()(context)
 
 
 proc use*(self: App, middleware: Middleware) =
@@ -65,7 +65,7 @@ proc serve*(self: App) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = Context(request: request)
-        app.dispatch(context)
+        await app.dispatch(context)
         await request.respond(context.response.status_code, context.response.body)
 
     let server = newAsyncHttpServer()
