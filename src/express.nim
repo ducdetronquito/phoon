@@ -38,19 +38,19 @@ proc compile_routes*(self: var App) =
 proc dispatch*(self: App, context: Context) {.async, discardable.} =
     let path = context.request.url.path
 
-    let potential_result = self.routing_table.match(path)
-    if potential_result.isNone:
+    let potential_match = self.routing_table.match(path)
+    if potential_match.isNone:
         context.Response(Http404, "")
         return
 
-    let result = potential_result.get()
-    let route = result.value
+    let match = potential_match.get()
+    let route = match.value
     let callback = route.get_callback_of(context.request.reqMethod)
     if callback.isNone:
         context.Response(Http405, "")
         return
 
-    context.parameters = result.parameters
+    context.parameters = match.parameters
     {.gcsafe.}:
         await callback.get()(context)
 
