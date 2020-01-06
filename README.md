@@ -1,22 +1,22 @@
 
-# Express 🚀🌘
+# Phoon 🐇⚡
 
-A toy Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/), [Echo](https://github.com/labstack/echo) and [Starlette](https://github.com/encode/starlette).
+An early-stage Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/).
 
 
-[![Build Status](https://api.travis-ci.org/ducdetronquito/express.svg?branch=master)](https://travis-ci.org/ducdetronquito/express) [![License](https://img.shields.io/badge/license-public%20domain-ff69b4.svg)](https://github.com/ducdetronquito/express#license)
+[![Build Status](https://api.travis-ci.org/ducdetronquito/phoon.svg?branch=master)](https://travis-ci.org/ducdetronquito/phoon) [![License](https://img.shields.io/badge/license-public%20domain-ff69b4.svg)](https://github.com/ducdetronquito/phoon#license)
 
 
 ## Usage
 
-Nota Bene: *Express is in its early stage, so every of its aspects is subject to changes* 🌪️
+Nota Bene: *Phoon is in its early stage, so every of its aspects is subject to changes* 🌪️
 
 ### Create an application:
 
 ```nim
 import asyncdispatch
 import asynchttpserver
-import express
+import phoon
 
 var app = new App
 
@@ -49,7 +49,7 @@ app.serve()
 ```nim
 import asyncdispatch
 import asynchttpserver
-import express
+import phoon
 
 var sub_router = Router()
 
@@ -66,7 +66,7 @@ app.mount("/nice", sub_router)
 ```nim
 import asyncdispatch
 import asynchttpserver
-import express
+import phoon
 
 proc SimpleAuthMiddleware(callback: Callback): Callback =
     return proc (context: Context)  {.async.} =
@@ -81,4 +81,4 @@ app.use(SimpleAuthMiddleware)
 
 ## License
 
-**Express** is released into the **Public Domain**. 🎉🍻
+**Phoon** is released into the **Public Domain**. 🎉🍻
