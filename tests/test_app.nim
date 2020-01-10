@@ -6,7 +6,7 @@ import utils
 
 
 suite "Endpoints":
-    
+
     test "GET endpoint":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
@@ -30,6 +30,18 @@ suite "Endpoints":
         app.dispatch(context)
         check(context.response.status_code == Http201)
         check(context.response.body == "I super JSON payloard")
+
+    test "PUT endpoint":
+        var context = Context(request: PutRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.put("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http201, "I am a PUT endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http201)
+        check(context.response.body == "I am a PUT endpoint")
 
     test "Can GET a endpoint already defined to handle POST requests":
         var context = Context(request: GetRequest("https://yumad.bro/memes"))

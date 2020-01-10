@@ -23,6 +23,10 @@ proc post*(self: var App, path: string, callback: Callback) =
     self.router.post(path, callback)
 
 
+proc put*(self: var App, path: string, callback: Callback) =
+    self.router.put(path, callback)
+
+
 proc mount*(self: var App, path: string, router: Router) =
     self.router.mount(path, router)
 

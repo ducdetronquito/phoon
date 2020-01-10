@@ -15,3 +15,10 @@ proc PostRequest*(path: string): Request =
         reqMethod: HttpMethod.HttpPost,
         url: uri
     )
+
+proc PutRequest*(path: string): Request =
+    let uri = parseUri(path)
+    return Request(
+        reqMethod: HttpMethod.HttpPut,
+        url: uri
+    )

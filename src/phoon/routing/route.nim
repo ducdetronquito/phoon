@@ -12,6 +12,7 @@ type
     Route* = ref object
         get_callback*: Option[Callback]
         post_callback*: Option[Callback]
+        put_callback*: Option[Callback]
 
 
 proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
@@ -20,6 +21,8 @@ proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
         return route.get_callback
     of HttpMethod.HttpPost:
         return route.post_callback
+    of HttpMethod.HttpPut:
+        return route.put_callback
     else:
         return none(Callback)
 
@@ -45,5 +48,9 @@ proc apply*(self: Route, middlewares: seq[Middleware]): Route =
     if self.post_callback.isSome:
         let callback = self.post_callback.get().apply(middlewares)
         result.post_callback = some(callback)
+
+    if self.put_callback.isSome:
+        let callback = self.put_callback.get().apply(middlewares)
+        result.put_callback = some(callback)
 
     return result
