@@ -24,12 +24,12 @@ suite "Endpoints":
         var app = App.new()
         app.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Response(Http200, "I am a GET endpoint")
         )
         app.compile_routes()
         app.dispatch(context)
         check(context.response.status_code == Http200)
-        check(context.response.body == "I am a boring home page")
+        check(context.response.body == "I am a GET endpoint")
 
     test "HEAD endpoint":
         var context = Context(request: Request(HttpMethod.HttpHead, "https://yumad.bro/"))
@@ -42,6 +42,18 @@ suite "Endpoints":
         app.dispatch(context)
         check(context.response.status_code == Http200)
         check(context.response.body == "I am a HEAD endpoint")
+
+    test "OPTIONS endpoint":
+        var context = Context(request: Request(HttpMethod.HttpOptions, "https://yumad.bro/"))
+        var app = App.new()
+        app.options("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http204, "I am a OPTIONS endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http204)
+        check(context.response.body == "I am a OPTIONS endpoint")
 
     test "PATCH endpoint":
         var context = Context(request: Request(HttpMethod.HttpPatch, "https://yumad.bro/"))

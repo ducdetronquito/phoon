@@ -13,6 +13,7 @@ type
         delete_callback*: Option[Callback]
         get_callback*: Option[Callback]
         head_callback*: Option[Callback]
+        options_callback*: Option[Callback]
         patch_callback*: Option[Callback]
         post_callback*: Option[Callback]
         put_callback*: Option[Callback]
@@ -26,6 +27,8 @@ proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
         return route.get_callback
     of HttpMethod.HttpHead:
         return route.head_callback
+    of HttpMethod.HttpOptions:
+        return route.options_callback
     of HttpMethod.HttpPatch:
         return route.patch_callback
     of HttpMethod.HttpPost:
@@ -61,6 +64,10 @@ proc apply*(self: Route, middlewares: seq[Middleware]): Route =
     if self.head_callback.isSome:
         let callback = self.head_callback.get().apply(middlewares)
         result.head_callback = some(callback)
+
+    if self.options_callback.isSome:
+        let callback = self.options_callback.get().apply(middlewares)
+        result.options_callback = some(callback)
 
     if self.patch_callback.isSome:
         let callback = self.patch_callback.get().apply(middlewares)
