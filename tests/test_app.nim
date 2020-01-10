@@ -6,18 +6,66 @@ import utils
 
 
 suite "Endpoints":
-    
+
+    test "DELETE endpoint":
+        var context = Context(request: Request(HttpMethod.HttpDelete, "https://yumad.bro/"))
+        var app = App.new()
+        app.delete("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http200, "I am a DELETE endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http200)
+        check(context.response.body == "I am a DELETE endpoint")
+
     test "GET endpoint":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Response(Http200, "I am a GET endpoint")
         )
         app.compile_routes()
         app.dispatch(context)
         check(context.response.status_code == Http200)
-        check(context.response.body == "I am a boring home page")
+        check(context.response.body == "I am a GET endpoint")
+
+    test "HEAD endpoint":
+        var context = Context(request: Request(HttpMethod.HttpHead, "https://yumad.bro/"))
+        var app = App.new()
+        app.head("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http200, "I am a HEAD endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http200)
+        check(context.response.body == "I am a HEAD endpoint")
+
+    test "OPTIONS endpoint":
+        var context = Context(request: Request(HttpMethod.HttpOptions, "https://yumad.bro/"))
+        var app = App.new()
+        app.options("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http204, "I am a OPTIONS endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http204)
+        check(context.response.body == "I am a OPTIONS endpoint")
+
+    test "PATCH endpoint":
+        var context = Context(request: Request(HttpMethod.HttpPatch, "https://yumad.bro/"))
+        var app = App.new()
+        app.patch("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http200, "I am a PATCH endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http200)
+        check(context.response.body == "I am a PATCH endpoint")
 
     test "POST endpoint":
         var context = Context(request: PostRequest("https://yumad.bro/"))
@@ -30,6 +78,18 @@ suite "Endpoints":
         app.dispatch(context)
         check(context.response.status_code == Http201)
         check(context.response.body == "I super JSON payloard")
+
+    test "PUT endpoint":
+        var context = Context(request: Request(HttpMethod.HttpPut, "https://yumad.bro/"))
+        var app = App.new()
+        app.put("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http201, "I am a PUT endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http201)
+        check(context.response.body == "I am a PUT endpoint")
 
     test "Can GET a endpoint already defined to handle POST requests":
         var context = Context(request: GetRequest("https://yumad.bro/memes"))

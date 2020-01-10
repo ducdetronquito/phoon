@@ -15,12 +15,32 @@ proc new*(app_type: type[App]): App =
     return App(router: Router(), routing_table: new Tree[Route])
 
 
+proc head*(self: var App, path: string, callback: Callback) =
+    self.router.head(path, callback)
+
+
+proc delete*(self: var App, path: string, callback: Callback) =
+    self.router.delete(path, callback)
+
+
 proc get*(self: var App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
 
+proc options*(self: var App, path: string, callback: Callback) =
+    self.router.options(path, callback)
+
+
+proc patch*(self: var App, path: string, callback: Callback) =
+    self.router.patch(path, callback)
+
+
 proc post*(self: var App, path: string, callback: Callback) =
     self.router.post(path, callback)
+
+
+proc put*(self: var App, path: string, callback: Callback) =
+    self.router.put(path, callback)
 
 
 proc mount*(self: var App, path: string, router: Router) =
