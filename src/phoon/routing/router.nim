@@ -11,12 +11,28 @@ type
         middlewares: seq[Middleware]
 
 
+proc delete*(self: var Router, path: string, callback: Callback) =
+    if self.routes.hasKey(path):
+        self.routes[path].delete_callback = some(callback)
+        return
+
+    var route = Route(
+        delete_callback: some(callback),
+        get_callback: none(Callback),
+        patch_callback: none(Callback),
+        post_callback: none(Callback),
+        put_callback: none(Callback)
+    )
+    self.routes.add(path, route)
+
+
 proc get*(self: var Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].get_callback = some(callback)
         return
 
     var route = Route(
+        delete_callback: none(Callback),
         get_callback: some(callback),
         patch_callback: none(Callback),
         post_callback: none(Callback),
@@ -31,6 +47,7 @@ proc patch*(self: var Router, path: string, callback: Callback) =
         return
 
     var route = Route(
+        delete_callback: none(Callback),
         get_callback: none(Callback),
         patch_callback: some(callback),
         post_callback: none(Callback),
@@ -45,6 +62,7 @@ proc post*(self: var Router, path: string, callback: Callback) =
         return
 
     var route = Route(
+        delete_callback: none(Callback),
         get_callback: none(Callback),
         patch_callback: none(Callback),
         post_callback: some(callback),
@@ -59,6 +77,7 @@ proc put*(self: var Router, path: string, callback: Callback) =
         return
 
     var route = Route(
+        delete_callback: none(Callback),
         get_callback: none(Callback),
         patch_callback: none(Callback),
         post_callback: none(Callback),

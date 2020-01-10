@@ -2,6 +2,14 @@ import asynchttpserver
 import uri
 
 
+proc DeleteRequest*(path: string): Request =
+    let uri = parseUri(path)
+    return Request(
+      reqMethod: HttpMethod.HttpDelete,
+      url: uri
+    )
+
+
 proc GetRequest*(path: string): Request =
     let uri = parseUri(path)
     return Request(

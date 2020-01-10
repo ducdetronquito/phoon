@@ -10,6 +10,7 @@ type
     Middleware* = proc (callback: Callback): Callback
 
     Route* = ref object
+        delete_callback*: Option[Callback]
         get_callback*: Option[Callback]
         patch_callback*: Option[Callback]
         post_callback*: Option[Callback]
@@ -18,6 +19,8 @@ type
 
 proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
     case http_method
+    of HttpMethod.HttpDelete:
+        return route.delete_callback
     of HttpMethod.HttpGet:
         return route.get_callback
     of HttpMethod.HttpPatch:
@@ -43,6 +46,10 @@ proc apply*(self: Callback, middlewares: seq[Middleware]): Callback =
 
 proc apply*(self: Route, middlewares: seq[Middleware]): Route =
     result = new Route
+
+    if self.delete_callback.isSome:
+        let callback = self.delete_callback.get().apply(middlewares)
+        result.delete_callback = some(callback)
 
     if self.get_callback.isSome:
         let callback = self.get_callback.get().apply(middlewares)

@@ -15,6 +15,10 @@ proc new*(app_type: type[App]): App =
     return App(router: Router(), routing_table: new Tree[Route])
 
 
+proc delete*(self: var App, path: string, callback: Callback) =
+    self.router.delete(path, callback)
+
+
 proc get*(self: var App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
