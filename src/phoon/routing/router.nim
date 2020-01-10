@@ -19,6 +19,7 @@ proc delete*(self: var Router, path: string, callback: Callback) =
     var route = Route(
         delete_callback: some(callback),
         get_callback: none(Callback),
+        head_callback: none(Callback),
         patch_callback: none(Callback),
         post_callback: none(Callback),
         put_callback: none(Callback)
@@ -34,6 +35,23 @@ proc get*(self: var Router, path: string, callback: Callback) =
     var route = Route(
         delete_callback: none(Callback),
         get_callback: some(callback),
+        head_callback: none(Callback),
+        patch_callback: none(Callback),
+        post_callback: none(Callback),
+        put_callback: none(Callback)
+    )
+    self.routes.add(path, route)
+
+
+proc head*(self: var Router, path: string, callback: Callback) =
+    if self.routes.hasKey(path):
+        self.routes[path].head_callback = some(callback)
+        return
+
+    var route = Route(
+        delete_callback: none(Callback),
+        get_callback: none(Callback),
+        head_callback: some(callback),
         patch_callback: none(Callback),
         post_callback: none(Callback),
         put_callback: none(Callback)
@@ -49,6 +67,7 @@ proc patch*(self: var Router, path: string, callback: Callback) =
     var route = Route(
         delete_callback: none(Callback),
         get_callback: none(Callback),
+        head_callback: none(Callback),
         patch_callback: some(callback),
         post_callback: none(Callback),
         put_callback: none(Callback)
@@ -64,6 +83,7 @@ proc post*(self: var Router, path: string, callback: Callback) =
     var route = Route(
         delete_callback: none(Callback),
         get_callback: none(Callback),
+        head_callback: none(Callback),
         patch_callback: none(Callback),
         post_callback: some(callback),
         put_callback: none(Callback)
@@ -79,6 +99,7 @@ proc put*(self: var Router, path: string, callback: Callback) =
     var route = Route(
         delete_callback: none(Callback),
         get_callback: none(Callback),
+        head_callback: none(Callback),
         patch_callback: none(Callback),
         post_callback: none(Callback),
         put_callback: some(callback)

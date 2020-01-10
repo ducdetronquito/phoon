@@ -8,7 +8,7 @@ import utils
 suite "Endpoints":
 
     test "DELETE endpoint":
-        var context = Context(request: DeleteRequest("https://yumad.bro/"))
+        var context = Context(request: Request(HttpMethod.HttpDelete, "https://yumad.bro/"))
         var app = App.new()
         app.delete("/",
             proc (context: Context) {.async.} =
@@ -31,8 +31,20 @@ suite "Endpoints":
         check(context.response.status_code == Http200)
         check(context.response.body == "I am a boring home page")
 
+    test "HEAD endpoint":
+        var context = Context(request: Request(HttpMethod.HttpHead, "https://yumad.bro/"))
+        var app = App.new()
+        app.head("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http200, "I am a HEAD endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http200)
+        check(context.response.body == "I am a HEAD endpoint")
+
     test "PATCH endpoint":
-        var context = Context(request: PatchRequest("https://yumad.bro/"))
+        var context = Context(request: Request(HttpMethod.HttpPatch, "https://yumad.bro/"))
         var app = App.new()
         app.patch("/",
             proc (context: Context) {.async.} =
@@ -56,7 +68,7 @@ suite "Endpoints":
         check(context.response.body == "I super JSON payloard")
 
     test "PUT endpoint":
-        var context = Context(request: PutRequest("https://yumad.bro/"))
+        var context = Context(request: Request(HttpMethod.HttpPut, "https://yumad.bro/"))
         var app = App.new()
         app.put("/",
             proc (context: Context) {.async.} =

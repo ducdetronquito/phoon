@@ -2,40 +2,13 @@ import asynchttpserver
 import uri
 
 
-proc DeleteRequest*(path: string): Request =
+proc Request*(http_method: HttpMethod, path: string): Request =
     let uri = parseUri(path)
-    return Request(
-      reqMethod: HttpMethod.HttpDelete,
-      url: uri
-    )
-
+    return Request(reqMethod: http_method, url: uri)
 
 proc GetRequest*(path: string): Request =
     let uri = parseUri(path)
-    return Request(
-      reqMethod: HttpMethod.HttpGet,
-      url: uri
-    )
-
-
-proc PatchRequest*(path: string): Request =
-    let uri = parseUri(path)
-    return Request(
-        reqMethod: HttpMethod.HttpPatch,
-        url: uri
-    )
-
+    return Request(HttpMethod.HttpGet, path)
 
 proc PostRequest*(path: string): Request =
-    let uri = parseUri(path)
-    return Request(
-        reqMethod: HttpMethod.HttpPost,
-        url: uri
-    )
-
-proc PutRequest*(path: string): Request =
-    let uri = parseUri(path)
-    return Request(
-        reqMethod: HttpMethod.HttpPut,
-        url: uri
-    )
+    return Request(HttpMethod.HttpPost, path)
