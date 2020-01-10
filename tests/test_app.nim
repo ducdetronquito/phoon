@@ -19,6 +19,18 @@ suite "Endpoints":
         check(context.response.status_code == Http200)
         check(context.response.body == "I am a boring home page")
 
+    test "PATCH endpoint":
+        var context = Context(request: PatchRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.patch("/",
+            proc (context: Context) {.async.} =
+                context.Response(Http200, "I am a PATCH endpoint")
+        )
+        app.compile_routes()
+        app.dispatch(context)
+        check(context.response.status_code == Http200)
+        check(context.response.body == "I am a PATCH endpoint")
+
     test "POST endpoint":
         var context = Context(request: PostRequest("https://yumad.bro/"))
         var app = App.new()

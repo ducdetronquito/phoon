@@ -16,7 +16,26 @@ proc get*(self: var Router, path: string, callback: Callback) =
         self.routes[path].get_callback = some(callback)
         return
 
-    var route = Route(get_callback: some(callback), post_callback: none(Callback), put_callback: none(Callback))
+    var route = Route(
+        get_callback: some(callback),
+        patch_callback: none(Callback),
+        post_callback: none(Callback),
+        put_callback: none(Callback)
+    )
+    self.routes.add(path, route)
+
+
+proc patch*(self: var Router, path: string, callback: Callback) =
+    if self.routes.hasKey(path):
+        self.routes[path].patch_callback = some(callback)
+        return
+
+    var route = Route(
+        get_callback: none(Callback),
+        patch_callback: some(callback),
+        post_callback: none(Callback),
+        put_callback: none(Callback)
+    )
     self.routes.add(path, route)
 
 
@@ -25,7 +44,12 @@ proc post*(self: var Router, path: string, callback: Callback) =
         self.routes[path].post_callback = some(callback)
         return
 
-    var route = Route(get_callback: none(Callback), post_callback: some(callback), put_callback: none(Callback))
+    var route = Route(
+        get_callback: none(Callback),
+        patch_callback: none(Callback),
+        post_callback: some(callback),
+        put_callback: none(Callback)
+    )
     self.routes.add(path, route)
 
 
@@ -34,7 +58,12 @@ proc put*(self: var Router, path: string, callback: Callback) =
         self.routes[path].put_callback = some(callback)
         return
 
-    var route = Route(get_callback: none(Callback), post_callback: none(Callback), put_callback: some(callback))
+    var route = Route(
+        get_callback: none(Callback),
+        patch_callback: none(Callback),
+        post_callback: none(Callback),
+        put_callback: some(callback)
+    )
     self.routes.add(path, route)
 
 

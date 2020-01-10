@@ -9,6 +9,15 @@ proc GetRequest*(path: string): Request =
       url: uri
     )
 
+
+proc PatchRequest*(path: string): Request =
+    let uri = parseUri(path)
+    return Request(
+        reqMethod: HttpMethod.HttpPatch,
+        url: uri
+    )
+
+
 proc PostRequest*(path: string): Request =
     let uri = parseUri(path)
     return Request(

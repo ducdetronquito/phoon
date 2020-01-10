@@ -19,6 +19,10 @@ proc get*(self: var App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
 
+proc patch*(self: var App, path: string, callback: Callback) =
+    self.router.patch(path, callback)
+
+
 proc post*(self: var App, path: string, callback: Callback) =
     self.router.post(path, callback)
 
