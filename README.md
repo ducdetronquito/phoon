@@ -1,7 +1,7 @@
 
 # Phoon 🐇⚡
 
-An early-stage Nim web framework heavily inspired by [ExpressJS](https://expressjs.com/).
+A web framework inspired by [ExpressJS](https://expressjs.com/).
 
 
 [![Build Status](https://api.travis-ci.org/ducdetronquito/phoon.svg?branch=master)](https://travis-ci.org/ducdetronquito/phoon) [![License](https://img.shields.io/badge/license-public%20domain-ff69b4.svg)](https://github.com/ducdetronquito/phoon#license)

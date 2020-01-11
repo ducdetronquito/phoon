@@ -2,9 +2,11 @@
 
 version       = "0.1.0"
 author        = "Guillaume Paulet"
-description   = "A toy Nim web framework heavily inspired by ExpressJS, Echo and Starlette."
+description   = "A web framework inspired by ExpressJS 🐇⚡"
 license       = "Public Domain"
+
 srcDir = "src"
+skipDirs = @["benchmark", "tests"]
 
 requires "nim >= 1.0.2"
 
