@@ -56,4 +56,4 @@ proc SimpleAuthMiddleware(callback: Callback): Callback =
 authenticated_router.use(SimpleAuthMiddleware)
 app.mount("/admins", authenticated_router)
 
-app.serve()
+app.serve(3000)

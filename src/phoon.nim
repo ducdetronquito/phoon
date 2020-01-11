@@ -79,7 +79,7 @@ proc use*(self: App, middleware: Middleware) =
     self.router.use(middleware)
 
 
-proc serve*(self: App) =
+proc serve*(self: App, port: int) =
     var app = deepCopy(self)
     app.compile_routes()
 
@@ -89,8 +89,11 @@ proc serve*(self: App) =
         await request.respond(context.response.status_code, context.response.body)
 
     let server = newAsyncHttpServer()
-    waitFor server.serve(Port(8080), main_dispatch)
+    waitFor server.serve(Port(port), main_dispatch)
 
+
+proc serve*(self: App) =
+    self.serve(8080)
 
 export context
 export errors
