@@ -95,6 +95,8 @@ proc serve*(self: App, port: int) =
 proc serve*(self: App) =
     self.serve(8080)
 
+export asynchttpserver
+export asyncdispatch
 export context
 export errors
 export route

@@ -14,8 +14,6 @@ Nota Bene: *Phoon is in its early stage, so every of its aspects is subject to c
 ### Create an application:
 
 ```nim
-import asyncdispatch
-import asynchttpserver
 import phoon
 
 var app = new App
@@ -47,8 +45,6 @@ app.serve(8080)
 ### Create a nested router
 
 ```nim
-import asyncdispatch
-import asynchttpserver
 import phoon
 
 var sub_router = Router()
@@ -64,8 +60,6 @@ app.mount("/nice", sub_router)
 ### Register a middleware
 
 ```nim
-import asyncdispatch
-import asynchttpserver
 import phoon
 
 proc SimpleAuthMiddleware(callback: Callback): Callback =

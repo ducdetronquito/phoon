@@ -1,5 +1,3 @@
-import asyncdispatch
-import asynchttpserver
 import phoon
 
 var app = new App
