@@ -7,18 +7,18 @@ var app = new App
 
 app.get("/",
     proc (context: Context) {.async.} =
-        context.Response(Http200, "")
+        context.Ok()
 )
 
 app.get("/users/{id}/",
     proc (context: Context) {.async.} =
         let user_id = context.parameters.get("id")
-        context.Response(Http200, user_id)
+        context.Ok(user_id)
 )
 
 app.post("/users/",
     proc (context: Context) {.async.} =
-        context.Response(Http201, "")
+        context.Created(user_id)
 )
 
 

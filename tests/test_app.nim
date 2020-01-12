@@ -10,136 +10,136 @@ suite "Endpoints":
         var app = App.new()
         app.delete("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a DELETE endpoint")
+                context.Ok("I am a DELETE endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
-        check(context.response.body == "I am a DELETE endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
+        check(response.body == "I am a DELETE endpoint")
 
     test "GET endpoint":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a GET endpoint")
+                context.Ok("I am a GET endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
-        check(context.response.body == "I am a GET endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
+        check(response.body == "I am a GET endpoint")
 
     test "HEAD endpoint":
         var context = Context(request: Request(HttpMethod.HttpHead, "https://yumad.bro/"))
         var app = App.new()
         app.head("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a HEAD endpoint")
+                context.Ok("I am a HEAD endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
-        check(context.response.body == "I am a HEAD endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
+        check(response.body == "I am a HEAD endpoint")
 
     test "OPTIONS endpoint":
         var context = Context(request: Request(HttpMethod.HttpOptions, "https://yumad.bro/"))
         var app = App.new()
         app.options("/",
             proc (context: Context) {.async.} =
-                context.Response(Http204, "I am a OPTIONS endpoint")
+                context.NoContent("I am an OPTIONS endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http204)
-        check(context.response.body == "I am a OPTIONS endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http204)
+        check(response.body == "I am an OPTIONS endpoint")
 
     test "PATCH endpoint":
         var context = Context(request: Request(HttpMethod.HttpPatch, "https://yumad.bro/"))
         var app = App.new()
         app.patch("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a PATCH endpoint")
+                context.Ok("I am a PATCH endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
-        check(context.response.body == "I am a PATCH endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
+        check(response.body == "I am a PATCH endpoint")
 
     test "POST endpoint":
         var context = Context(request: PostRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
             proc (context: Context) {.async.} =
-                context.Response(Http201, "I super JSON payloard")
+                context.Created("I super JSON payloard")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http201)
-        check(context.response.body == "I super JSON payloard")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http201)
+        check(response.body == "I super JSON payloard")
 
     test "PUT endpoint":
         var context = Context(request: Request(HttpMethod.HttpPut, "https://yumad.bro/"))
         var app = App.new()
         app.put("/",
             proc (context: Context) {.async.} =
-                context.Response(Http201, "I am a PUT endpoint")
+                context.Created("I am a PUT endpoint")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http201)
-        check(context.response.body == "I am a PUT endpoint")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http201)
+        check(response.body == "I am a PUT endpoint")
 
     test "Can GET a endpoint already defined to handle POST requests":
         var context = Context(request: GetRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.post("/memes",
             proc (context: Context) {.async.} =
-                context.Response(Http201, "Create a meme")
+                context.Created("Create a meme")
         )
         app.get("/memes",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "Retrieve all the good memes")
+                context.Ok("Retrieve all the good memes")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
 
     test "Can POST a endpoint already defined to handle GET requests":
         var context = Context(request: PostRequest("https://yumad.bro/memes"))
         var app = App.new()
         app.get("/memes",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "Retrieve all the good memes")
+                context.Ok("Retrieve all the good memes")
         )
         app.post("/memes",
             proc (context: Context) {.async.} =
-                context.Response(Http201, "Create a meme")
+                context.Created("Create a meme")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http201)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http201)
 
     test "Not found endpoint returns a 404 status code.":
         var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
         var app = App.new()
         app.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Ok("I am a boring home page")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http404)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http404)
 
     test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
         app.post("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Ok("I am a boring home page")
         )
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http405)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http405)
 
     test "Can define a nested router":
         var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
@@ -148,15 +148,15 @@ suite "Endpoints":
         var router = Router.new()
         router.get("/users",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "Some nice users")
+                context.Ok("Some nice users")
         )
 
         app.mount("/api/v1", router)
 
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http200)
-        check(context.response.body == "Some nice users")
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http200)
+        check(response.body == "Some nice users")
 
     test "Cannot define a nested router on a wildcard route":
         var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
@@ -165,7 +165,7 @@ suite "Endpoints":
         var router = Router.new()
         router.get("/users",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "Some nice users")
+                context.Ok("Some nice users")
         )
 
         doAssertRaises(InvalidPathError):
@@ -177,13 +177,13 @@ suite "Endpoints":
 
         app.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Ok("I am a boring home page")
         )
 
         proc TeapotMiddleware(callback: Callback): Callback =
             return proc (context: Context) {.async.} =
                 if context.request.url.path != "teapot":
-                    context.Response(Http418, "")
+                    context.Teapot("")
                     return
                 await callback(context)
 
@@ -191,8 +191,8 @@ suite "Endpoints":
 
         app.compile_routes()
 
-        app.dispatch(context)
-        check(context.response.status_code == Http418)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http418)
 
     test "Can register a middleware on a sub-router":
         var context = Context(request: GetRequest("https://yumad.bro/users/"))
@@ -201,13 +201,13 @@ suite "Endpoints":
         var router = Router.new()
         router.get("/",
             proc (context: Context) {.async.} =
-                context.Response(Http200, "I am a boring home page")
+                context.Ok("I am a boring home page")
         )
 
         proc TeapotMiddleware(callback: Callback): Callback =
             return proc (context: Context) {.async.} =
                 if context.request.url.path != "teapot":
-                    context.Response(Http418, "")
+                    context.Teapot("")
                     return
                 await callback(context)
 
@@ -215,5 +215,5 @@ suite "Endpoints":
         app.mount("/users", router)
 
         app.compile_routes()
-        app.dispatch(context)
-        check(context.response.status_code == Http418)
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http418)

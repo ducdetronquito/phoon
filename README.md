@@ -20,23 +20,23 @@ var app = new App
 
 app.get("/",
     proc (context: Context) {.async.} =
-        context.Response(Http200, "I am a boring home page")
+        context.Ok("I am a boring home page")
 )
 
 app.post("/users",
     proc (context: Context) {.async.} =
-        context.Response(Http201, "You just created a new user !")
+        context.Created("You just created a new user !")
 )
 
 app.get("/us*",
     proc (context: Context) {.async.} =
-        context.Response(Http200, "Every URL starting with 'us' falls back here.")
+        context.Ok("Every URL starting with 'us' falls back here.")
 )
 
 app.get("/books/{title}",
     proc (context: Context) {.async.} =
         var book_title = context.parameters.get("title")
-        context.Response(Http200, "Of course I read '" & book_title & "' !")
+        context.Ok("Of course I read '" & book_title & "' !")
 )
 
 app.serve(8080)
@@ -51,7 +51,7 @@ var sub_router = Router()
 
 sub_router.get("/users",
     proc (context: Context) {.async.} =
-        context.Response(Http200, "Here are some nice users")
+        context.Ok("Here are some nice users")
 )
 
 app.mount("/nice", sub_router)
@@ -67,7 +67,7 @@ proc SimpleAuthMiddleware(callback: Callback): Callback =
         if context.request.headers.hasKey("simple-auth"):
             await callback(context)
         else:
-            context.Response(Http401, "")
+            context.Unauthenticated()
 
 app.use(SimpleAuthMiddleware)
 ```

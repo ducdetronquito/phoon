@@ -1,6 +1,6 @@
 import asynchttpserver
 import asyncdispatch
-import phoon/context
+import phoon/[context, response]
 import phoon/routing/[errors, route, router, tree]
 import options
 
@@ -55,24 +55,25 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, compile_route)
 
 
-proc dispatch*(self: App, context: Context) {.async, discardable.} =
+proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
     let path = context.request.url.path
 
     let potential_match = self.routing_table.match(path)
     if potential_match.isNone:
-        context.Response(Http404, "")
-        return
+        return response.NotFound()
 
     let match = potential_match.get()
     let route = match.value
     let callback = route.get_callback_of(context.request.reqMethod)
     if callback.isNone:
-        context.Response(Http405, "")
-        return
+        return response.MethodNotAllowed()
 
     context.parameters = match.parameters
     {.gcsafe.}:
-        await callback.get()(context)
+        let future = callback.get()(context)
+        yield future
+        if not future.failed:
+            return context.response
 
 
 proc use*(self: App, middleware: Middleware) =
@@ -85,8 +86,8 @@ proc serve*(self: App, port: int) =
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = Context(request: request)
-        await app.dispatch(context)
-        await request.respond(context.response.status_code, context.response.body)
+        let response = await app.dispatch(context)
+        await request.respond(response.status_code, response.body)
 
     let server = newAsyncHttpServer()
     waitFor server.serve(Port(port), main_dispatch)
