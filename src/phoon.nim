@@ -128,7 +128,7 @@ proc use*(self: App, middleware: Middleware) =
     self.router.use(middleware)
 
 
-proc serve*(self: App, port: int) =
+proc serve*(self: App, port: int, address: string = "") =
     var app = deepCopy(self)
     app.compile_routes()
 
@@ -138,7 +138,7 @@ proc serve*(self: App, port: int) =
         await request.respond(response.status_code, response.body)
 
     let server = newAsyncHttpServer()
-    waitFor server.serve(Port(port), main_dispatch)
+    waitFor server.serve(port = Port(port), callback = main_dispatch, address = address)
 
 
 proc serve*(self: App) =
