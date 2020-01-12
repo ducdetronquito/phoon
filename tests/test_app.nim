@@ -1,4 +1,5 @@
 import phoon
+import strutils
 import unittest
 import utils
 
@@ -217,3 +218,18 @@ suite "Endpoints":
         app.compile_routes()
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http418)
+
+
+suite "Error handling":
+    test "Unhandled exception return an HTTP 500 Bad Request":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "")

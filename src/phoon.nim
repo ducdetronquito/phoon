@@ -72,7 +72,9 @@ proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
     {.gcsafe.}:
         let future = callback.get()(context)
         yield future
-        if not future.failed:
+        if future.failed:
+            return response.BadRequest()
+        else:
             return context.response
 
 
