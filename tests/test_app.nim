@@ -120,17 +120,6 @@ suite "Endpoints":
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http201)
 
-    test "Not found endpoint returns a 404 status code.":
-        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
-        var app = App.new()
-        app.get("/",
-            proc (context: Context) {.async.} =
-                context.Ok("I am a boring home page")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(context)
-        check(response.status_code == Http404)
-
     test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
@@ -249,4 +238,32 @@ suite "Error handling":
         app.compile_routes()
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http500)
+        check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Not found endpoint returns a 404 status code.":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http404)
+        check(response.body == "")
+
+    test "Define a custom HTTP 404 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.not_found(
+            proc (context: Context) {.async.} =
+                context.NotFound("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http404)
         check(response.body == "¯\\_(ツ)_/¯")

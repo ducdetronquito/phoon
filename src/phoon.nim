@@ -10,16 +10,22 @@ type
         router: Router
         routing_table: Tree[Route]
         bad_request_callback*: Callback
+        not_found_callback*: Callback
 
 proc default_bad_request_callback(context: Context) {.async.} =
     context.BadRequest()
+
+
+proc default_not_found_callback(context: Context) {.async.} =
+    context.NotFound()
 
 
 proc new*(app_type: type[App]): App =
     return App(
         router: Router(),
         routing_table: new Tree[Route],
-        bad_request_callback: default_bad_request_callback
+        bad_request_callback: default_bad_request_callback,
+        not_found_callback: default_not_found_callback
     )
 
 
@@ -58,6 +64,9 @@ proc mount*(self: var App, path: string, router: Router) =
 proc bad_request*(self: var App, callback: Callback) =
     self.bad_request_callback = callback
 
+proc not_found*(self: var App, callback: Callback) =
+    self.not_found_callback = callback
+
 
 proc compile_routes*(self: var App) =
     let middlewares = self.router.get_middlewares()
@@ -72,7 +81,9 @@ proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
 
     let potential_match = self.routing_table.match(path)
     if potential_match.isNone:
-        return response.NotFound()
+        {.gcsafe.}:
+            await self.not_found_callback(context)
+            return context.response
 
     let match = potential_match.get()
     let route = match.value
