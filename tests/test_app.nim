@@ -120,17 +120,6 @@ suite "Endpoints":
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http201)
 
-    test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
-        var context = Context(request: GetRequest("https://yumad.bro/"))
-        var app = App.new()
-        app.post("/",
-            proc (context: Context) {.async.} =
-                context.Ok("I am a boring home page")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(context)
-        check(response.status_code == Http405)
-
     test "Can define a nested router":
         var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()
@@ -266,4 +255,32 @@ suite "Error handling":
         app.compile_routes()
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http404)
+        check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http405)
+        check(response.body == "")
+
+    test "Define a custom HTTP 405 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.method_not_allowed(
+            proc (context: Context) {.async.} =
+                context.MethodNotAllowed("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http405)
         check(response.body == "¯\\_(ツ)_/¯")
