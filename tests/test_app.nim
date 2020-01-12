@@ -233,3 +233,20 @@ suite "Error handling":
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http500)
         check(response.body == "")
+
+    test "Define a custom HTTP 500 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "¯\\_(ツ)_/¯")

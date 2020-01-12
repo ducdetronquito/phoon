@@ -9,10 +9,18 @@ type
     App* = ref object
         router: Router
         routing_table: Tree[Route]
+        bad_request_callback*: Callback
+
+proc default_bad_request_callback(context: Context) {.async.} =
+    context.BadRequest()
 
 
 proc new*(app_type: type[App]): App =
-    return App(router: Router(), routing_table: new Tree[Route])
+    return App(
+        router: Router(),
+        routing_table: new Tree[Route],
+        bad_request_callback: default_bad_request_callback
+    )
 
 
 proc head*(self: var App, path: string, callback: Callback) =
@@ -47,6 +55,10 @@ proc mount*(self: var App, path: string, router: Router) =
     self.router.mount(path, router)
 
 
+proc bad_request*(self: var App, callback: Callback) =
+    self.bad_request_callback = callback
+
+
 proc compile_routes*(self: var App) =
     let middlewares = self.router.get_middlewares()
 
@@ -73,7 +85,8 @@ proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
         let future = callback.get()(context)
         yield future
         if future.failed:
-            return response.BadRequest()
+            await self.bad_request_callback(context)
+            return context.response
         else:
             return context.response
 
