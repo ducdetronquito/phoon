@@ -229,6 +229,24 @@ suite "Error handling":
         check(response.status_code == Http500)
         check(response.body == "¯\\_(ツ)_/¯")
 
+    test "Fallback to a default Bad Request if the custom HTTP 500 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.BadRequest("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "")
+
     test "Not found endpoint returns a 404 status code.":
         var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
         var app = App.new()
@@ -257,6 +275,27 @@ suite "Error handling":
         check(response.status_code == Http404)
         check(response.body == "¯\\_(ツ)_/¯")
 
+    test "Fallback to a custom Bad Request if the custom HTTP 404 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.not_found(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.NotFound("¯\\_(ツ)_/¯")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("ᕕ( ᐛ )ᕗ")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "ᕕ( ᐛ )ᕗ")
+
     test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
         var context = Context(request: GetRequest("https://yumad.bro/"))
         var app = App.new()
@@ -284,3 +323,24 @@ suite "Error handling":
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http405)
         check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Fallback to a custom Bad Request if the custom HTTP 405 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.method_not_allowed(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.MethodNotAllowed("¯\\_(ツ)_/¯")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("ᕕ( ᐛ )ᕗ")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "ᕕ( ᐛ )ᕗ")
