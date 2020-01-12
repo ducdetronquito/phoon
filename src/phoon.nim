@@ -9,10 +9,30 @@ type
     App* = ref object
         router: Router
         routing_table: Tree[Route]
+        bad_request_callback*: Callback
+        not_found_callback*: Callback
+        method_not_allowed_callback*: Callback
+
+proc default_bad_request_callback(context: Context) {.async.} =
+    context.BadRequest()
+
+
+proc default_not_found_callback(context: Context) {.async.} =
+    context.NotFound()
+
+
+proc default_method_not_allowed_callback(context: Context) {.async.} =
+    context.MethodNotAllowed()
 
 
 proc new*(app_type: type[App]): App =
-    return App(router: Router(), routing_table: new Tree[Route])
+    return App(
+        router: Router(),
+        routing_table: new Tree[Route],
+        bad_request_callback: default_bad_request_callback,
+        not_found_callback: default_not_found_callback,
+        method_not_allowed_callback: default_method_not_allowed_callback
+    )
 
 
 proc head*(self: var App, path: string, callback: Callback) =
@@ -47,6 +67,18 @@ proc mount*(self: var App, path: string, router: Router) =
     self.router.mount(path, router)
 
 
+proc bad_request*(self: var App, callback: Callback) =
+    self.bad_request_callback = callback
+
+
+proc not_found*(self: var App, callback: Callback) =
+    self.not_found_callback = callback
+
+
+proc method_not_allowed*(self: var App, callback: Callback) =
+    self.method_not_allowed_callback = callback
+
+
 proc compile_routes*(self: var App) =
     let middlewares = self.router.get_middlewares()
 
@@ -55,25 +87,41 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, compile_route)
 
 
+proc fail_safe(self: App, callback: Callback, context: Context): Future[Response] {.async.} =
+    let callback_future = callback(context)
+    yield callback_future
+    if not callback_future.failed:
+        return context.response
+
+    let bad_request_future = self.bad_request_callback(context)
+    yield bad_request_future
+    if not bad_request_future.failed:
+        return context.response
+
+    return response.BadRequest()
+
+
 proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
     let path = context.request.url.path
 
     let potential_match = self.routing_table.match(path)
     if potential_match.isNone:
-        return response.NotFound()
+        {.gcsafe.}:
+            let response = await fail_safe(self, self.not_found_callback, context)
+            return response
 
     let match = potential_match.get()
     let route = match.value
     let callback = route.get_callback_of(context.request.reqMethod)
     if callback.isNone:
-        return response.MethodNotAllowed()
+        {.gcsafe.}:
+            let response = await fail_safe(self, self.method_not_allowed_callback, context)
+            return response
 
     context.parameters = match.parameters
     {.gcsafe.}:
-        let future = callback.get()(context)
-        yield future
-        if not future.failed:
-            return context.response
+        let response = await fail_safe(self, callback.get(), context)
+        return response
 
 
 proc use*(self: App, middleware: Middleware) =

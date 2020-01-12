@@ -73,6 +73,30 @@ app.use(SimpleAuthMiddleware)
 ```
 
 
+### Error handling
+
+```nim
+import phoon
+
+# Define a custom callback that is called when no registered route matched the incoming request path.
+app.not_found(
+    proc (context: Context) {.async.} =
+        context.NotFound("Not Found ¯\\_(ツ)_/¯")
+)
+
+# Define a custom callback that is called when an unexpected HTTP method is used on a registered route.
+app.method_not_allowed(
+    proc (context: Context) {.async.} =
+        context.NotFound("Method Not Allowed ¯\\_(ツ)_/¯")
+)
+
+# Define a custom callback that is called when unhandled exceptions are raised in your code.
+app.bad_request(
+    proc (context: Context) {.async.} =
+        context.BadRequest("Bad Request ¯\\_(ツ)_/¯")
+)
+```
+
 ## License
 
 **Phoon** is released into the **Public Domain**. 🎉🍻

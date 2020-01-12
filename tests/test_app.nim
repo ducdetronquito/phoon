@@ -1,4 +1,5 @@
 import phoon
+import strutils
 import unittest
 import utils
 
@@ -119,28 +120,6 @@ suite "Endpoints":
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http201)
 
-    test "Not found endpoint returns a 404 status code.":
-        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
-        var app = App.new()
-        app.get("/",
-            proc (context: Context) {.async.} =
-                context.Ok("I am a boring home page")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(context)
-        check(response.status_code == Http404)
-
-    test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
-        var context = Context(request: GetRequest("https://yumad.bro/"))
-        var app = App.new()
-        app.post("/",
-            proc (context: Context) {.async.} =
-                context.Ok("I am a boring home page")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(context)
-        check(response.status_code == Http405)
-
     test "Can define a nested router":
         var context = Context(request: GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()
@@ -217,3 +196,151 @@ suite "Endpoints":
         app.compile_routes()
         let response = waitFor app.dispatch(context)
         check(response.status_code == Http418)
+
+
+suite "Error handling":
+    test "Unhandled exception return an HTTP 500 Bad Request":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "")
+
+    test "Define a custom HTTP 500 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Fallback to a default Bad Request if the custom HTTP 500 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                discard parseInt("Some business logic that should have been an int")
+                context.Ok("I am a GET endpoint")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.BadRequest("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "")
+
+    test "Not found endpoint returns a 404 status code.":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http404)
+        check(response.body == "")
+
+    test "Define a custom HTTP 404 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.not_found(
+            proc (context: Context) {.async.} =
+                context.NotFound("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http404)
+        check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Fallback to a custom Bad Request if the custom HTTP 404 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/an-undefined-url"))
+        var app = App.new()
+        app.get("/",
+            proc (context: Context) {.async.} =
+                context.Ok()
+        )
+        app.not_found(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.NotFound("¯\\_(ツ)_/¯")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("ᕕ( ᐛ )ᕗ")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "ᕕ( ᐛ )ᕗ")
+
+    test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http405)
+        check(response.body == "")
+
+    test "Define a custom HTTP 405 handler":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.method_not_allowed(
+            proc (context: Context) {.async.} =
+                context.MethodNotAllowed("¯\\_(ツ)_/¯")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http405)
+        check(response.body == "¯\\_(ツ)_/¯")
+
+    test "Fallback to a custom Bad Request if the custom HTTP 405 callback fails":
+        var context = Context(request: GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.post("/",
+            proc (context: Context) {.async.} =
+                context.Created()
+        )
+        app.method_not_allowed(
+            proc (context: Context) {.async.} =
+                discard parseInt("Not a number")
+                context.MethodNotAllowed("¯\\_(ツ)_/¯")
+        )
+        app.bad_request(
+            proc (context: Context) {.async.} =
+                context.BadRequest("ᕕ( ᐛ )ᕗ")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(context)
+        check(response.status_code == Http500)
+        check(response.body == "ᕕ( ᐛ )ᕗ")
