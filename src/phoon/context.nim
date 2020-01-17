@@ -3,9 +3,14 @@ import routing/tree
 
 
 type
-    Response* = object
+    Response* = ref object
         status_code*: HttpCode
         body*: string
+        headers*: HttpHeaders
+
+
+proc new (response_type: type[Response]): Response =
+    return Response(status_code: Http200, body: "", headers: newHttpHeaders())
 
 
 type
@@ -16,5 +21,4 @@ type
 
 
 proc from_request*(context_type: type[Context], request: Request): Context =
-    var response = Response(status_code: Http200, body: "")
-    return Context(request: request, response: response)
+    return Context(request: request, response: Response.new())

@@ -1,15 +1,8 @@
 import httpClient
-import osproc
 import unittest
 
 
 suite "Integration tests":
-    var process = startProcess(
-        "nim",
-        args=["c", "-r", "tests/integration/simple_server.nim"],
-        options={ProcessOption.poUsePath}
-    )
-
     var client = newHttpClient()
 
     test "Get request":
@@ -58,6 +51,6 @@ suite "Integration tests":
         check(response.status == "200 OK")
         check(response.body == "Admins, he is doing it sideways !")
 
-    # TODO: The process is still running even after being killed.
-    process.kill()
-    process.close()
+    test "Can retrieve the response headers":
+        let response = client.get("http://localhost:3000/json")
+        check(response.headers["content-type"] == "application/json")

@@ -93,12 +93,14 @@ proc fail_safe(self: App, callback: Callback, context: Context): Future[Response
     if not callback_future.failed:
         return context.response
 
+    context.response = Response.new()
+
     let bad_request_future = self.bad_request_callback(context)
     yield bad_request_future
     if not bad_request_future.failed:
         return context.response
 
-    context.response.status_code = Http500
+    await default_bad_request_callback(context)
     return context.response
 
 
@@ -136,7 +138,7 @@ proc serve*(self: App, port: int, address: string = "") =
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = Context.from_request(request)
         let response = await app.dispatch(context)
-        await request.respond(response.status_code, response.body)
+        await request.respond(response.status_code, response.body, response.headers)
 
     let server = newAsyncHttpServer()
     waitFor server.serve(port = Port(port), callback = main_dispatch, address = address)

@@ -25,6 +25,13 @@ app.get("/books/{title}",
         context.response.body = "Of course I read '" & book_title & "' !"
 )
 
+app.get("/json",
+    proc (context: Context) {.async.} =
+        context.response.headers.add("Content-Type", "application/json")
+        context.response.body = "{}"
+)
+
+
 
 var sub_router = Router()
 
