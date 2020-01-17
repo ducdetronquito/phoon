@@ -1,6 +1,6 @@
 import asynchttpserver
 import asyncdispatch
-import phoon/[context, response]
+import phoon/context
 import phoon/routing/[errors, route, router, tree]
 import options
 
@@ -14,15 +14,15 @@ type
         method_not_allowed_callback*: Callback
 
 proc default_bad_request_callback(context: Context) {.async.} =
-    context.BadRequest()
+    context.response.status_code = Http500
 
 
 proc default_not_found_callback(context: Context) {.async.} =
-    context.NotFound()
+    context.response.status_code = Http404
 
 
 proc default_method_not_allowed_callback(context: Context) {.async.} =
-    context.MethodNotAllowed()
+    context.response.status_code = Http405
 
 
 proc new*(app_type: type[App]): App =
@@ -93,12 +93,15 @@ proc fail_safe(self: App, callback: Callback, context: Context): Future[Response
     if not callback_future.failed:
         return context.response
 
+    context.response = Response.new()
+
     let bad_request_future = self.bad_request_callback(context)
     yield bad_request_future
     if not bad_request_future.failed:
         return context.response
 
-    return response.BadRequest()
+    await default_bad_request_callback(context)
+    return context.response
 
 
 proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
@@ -133,9 +136,9 @@ proc serve*(self: App, port: int, address: string = "") =
     app.compile_routes()
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        var context = Context(request: request)
+        var context = Context.from_request(request)
         let response = await app.dispatch(context)
-        await request.respond(response.status_code, response.body)
+        await request.respond(response.status_code, response.body, response.headers)
 
     let server = newAsyncHttpServer()
     waitFor server.serve(port = Port(port), callback = main_dispatch, address = address)
