@@ -19,24 +19,24 @@ import phoon
 var app = new App
 
 app.get("/",
-    proc (context: Context) {.async.} =
-        context.response.body("I am a boring home page")
+    proc (ctx: Context) {.async.} =
+        ctx.response.body("I am a boring home page")
 )
 
 app.post("/users",
-    proc (context: Context) {.async.} =
-        context.response.status(Http201).body("You just created a new user !")
+    proc (ctx: Context) {.async.} =
+        ctx.response.status(Http201).body("You just created a new user !")
 )
 
 app.get("/us*",
-    proc (context: Context) {.async.} =
-        context.response.body("Every URL starting with 'us' falls back here.")
+    proc (ctx: Context) {.async.} =
+        ctx.response.body("Every URL starting with 'us' falls back here.")
 )
 
 app.get("/books/{title}",
-    proc (context: Context) {.async.} =
-        var book_title = context.parameters.get("title")
-        context.response.body("Of course I read '" & book_title & "' !")
+    proc (ctx: Context) {.async.} =
+        var book_title = ctx.parameters.get("title")
+        ctx.response.body("Of course I read '" & book_title & "' !")
 )
 
 app.serve(8080)
@@ -50,8 +50,8 @@ import phoon
 var sub_router = Router()
 
 sub_router.get("/users",
-    proc (context: Context) {.async.} =
-        context.response.body("Here are some nice users")
+    proc (ctx: Context) {.async.} =
+        ctx.response.body("Here are some nice users")
 )
 
 app.mount("/nice", sub_router)
@@ -63,11 +63,11 @@ app.mount("/nice", sub_router)
 import phoon
 
 proc SimpleAuthMiddleware(callback: Callback): Callback =
-    return proc (context: Context)  {.async.} =
-        if context.request.headers.hasKey("simple-auth"):
-            await callback(context)
+    return proc (ctx: Context)  {.async.} =
+        if ctx.request.headers.hasKey("simple-auth"):
+            await callback(ctx)
         else:
-            context.response.status(Http401)
+            ctx.response.status(Http401)
 
 app.use(SimpleAuthMiddleware)
 ```
@@ -80,20 +80,20 @@ import phoon
 
 # Define a custom callback that is called when no registered route matched the incoming request path.
 app.not_found(
-    proc (context: Context) {.async.} =
-        context.response.status(Http404).body("Not Found ¯\\_(ツ)_/¯")
+    proc (ctx: Context) {.async.} =
+        ctx.response.status(Http404).body("Not Found ¯\\_(ツ)_/¯")
 )
 
 # Define a custom callback that is called when an unexpected HTTP method is used on a registered route.
 app.method_not_allowed(
-    proc (context: Context) {.async.} =
-        context.response.status(http405).body("Method Not Allowed ¯\\_(ツ)_/¯")
+    proc (ctx: Context) {.async.} =
+        ctx.response.status(http405).body("Method Not Allowed ¯\\_(ツ)_/¯")
 )
 
 # Define a custom callback that is called when unhandled exceptions are raised in your code.
 app.bad_request(
-    proc (context: Context) {.async.} =
-        context.response.status(http500).body("Bad Request ¯\\_(ツ)_/¯")
+    proc (ctx: Context) {.async.} =
+        ctx.response.status(http500).body("Bad Request ¯\\_(ツ)_/¯")
 )
 ```
 

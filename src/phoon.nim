@@ -13,16 +13,16 @@ type
         not_found_callback*: Callback
         method_not_allowed_callback*: Callback
 
-proc default_bad_request_callback(context: Context) {.async.} =
-    context.response.status(Http500)
+proc default_bad_request_callback(ctx: Context) {.async.} =
+    ctx.response.status(Http500)
 
 
-proc default_not_found_callback(context: Context) {.async.} =
-    context.response.status(Http404)
+proc default_not_found_callback(ctx: Context) {.async.} =
+    ctx.response.status(Http404)
 
 
-proc default_method_not_allowed_callback(context: Context) {.async.} =
-    context.response.status(Http405)
+proc default_method_not_allowed_callback(ctx: Context) {.async.} =
+    ctx.response.status(Http405)
 
 
 proc new*(app_type: type[App]): App =
@@ -87,43 +87,43 @@ proc compile_routes*(self: var App) =
         self.routing_table.insert(path, compile_route)
 
 
-proc fail_safe(self: App, callback: Callback, context: Context): Future[Response] {.async.} =
-    let callback_future = callback(context)
+proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.async.} =
+    let callback_future = callback(ctx)
     yield callback_future
     if not callback_future.failed:
-        return context.response
+        return ctx.response
 
-    context.response = Response.new()
+    ctx.response = Response.new()
 
-    let bad_request_future = self.bad_request_callback(context)
+    let bad_request_future = self.bad_request_callback(ctx)
     yield bad_request_future
     if not bad_request_future.failed:
-        return context.response
+        return ctx.response
 
-    await default_bad_request_callback(context)
-    return context.response
+    await default_bad_request_callback(ctx)
+    return ctx.response
 
 
-proc dispatch*(self: App, context: Context): Future[Response] {.async.} =
-    let path = context.request.url.path
+proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
+    let path = ctx.request.url.path
 
     let potential_match = self.routing_table.match(path)
     if potential_match.isNone:
         {.gcsafe.}:
-            let response = await fail_safe(self, self.not_found_callback, context)
+            let response = await fail_safe(self, self.not_found_callback, ctx)
             return response
 
     let match = potential_match.get()
     let route = match.value
-    let callback = route.get_callback_of(context.request.reqMethod)
+    let callback = route.get_callback_of(ctx.request.reqMethod)
     if callback.isNone:
         {.gcsafe.}:
-            let response = await fail_safe(self, self.method_not_allowed_callback, context)
+            let response = await fail_safe(self, self.method_not_allowed_callback, ctx)
             return response
 
-    context.parameters = match.parameters
+    ctx.parameters = match.parameters
     {.gcsafe.}:
-        let response = await fail_safe(self, callback.get(), context)
+        let response = await fail_safe(self, callback.get(), ctx)
         return response
 
 
@@ -136,8 +136,8 @@ proc serve*(self: App, port: int, address: string = "") =
     app.compile_routes()
 
     proc main_dispatch(request: Request) {.async, gcsafe.} =
-        var context = Context.from_request(request)
-        let response = await app.dispatch(context)
+        var ctx = Context.from_request(request)
+        let response = await app.dispatch(ctx)
         await request.respond(response.get_status(), response.get_body(), response.headers)
 
     let server = newAsyncHttpServer()

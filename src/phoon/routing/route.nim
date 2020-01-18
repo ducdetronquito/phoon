@@ -5,7 +5,7 @@ import options
 
 
 type
-    Callback* = proc(context: Context): Future[void]
+    Callback* = proc(ctx: Context): Future[void]
 
     Middleware* = proc (callback: Callback): Callback
 

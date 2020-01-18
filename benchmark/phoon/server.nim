@@ -4,20 +4,20 @@ import src/phoon
 var app = new App
 
 app.get("/",
-    proc (context: Context) {.async.} =
+    proc (ctx: Context) {.async.} =
         discard
 )
 
 app.get("/users/{id}/",
-    proc (context: Context) {.async.} =
-        let user_id = context.parameters.get("id")
-        context.response.body = user_id
+    proc (ctx: Context) {.async.} =
+        let user_id = ctx.parameters.get("id")
+        ctx.response.body = user_id
 )
 
 app.post("/users/",
-    proc (context: Context) {.async.} =
-        context.response.status_code = Http201
-        context.response.body = user_id
+    proc (ctx: Context) {.async.} =
+        ctx.response.status_code = Http201
+        ctx.response.body = user_id
 
 )
 
