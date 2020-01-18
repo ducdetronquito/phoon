@@ -14,15 +14,15 @@ type
         method_not_allowed_callback*: Callback
 
 proc default_bad_request_callback(context: Context) {.async.} =
-    context.response.status_code = Http500
+    context.response.status(Http500)
 
 
 proc default_not_found_callback(context: Context) {.async.} =
-    context.response.status_code = Http404
+    context.response.status(Http404)
 
 
 proc default_method_not_allowed_callback(context: Context) {.async.} =
-    context.response.status_code = Http405
+    context.response.status(Http405)
 
 
 proc new*(app_type: type[App]): App =
@@ -138,7 +138,7 @@ proc serve*(self: App, port: int, address: string = "") =
     proc main_dispatch(request: Request) {.async, gcsafe.} =
         var context = Context.from_request(request)
         let response = await app.dispatch(context)
-        await request.respond(response.status_code, response.body, response.headers)
+        await request.respond(response.get_status(), response.get_body(), response.headers)
 
     let server = newAsyncHttpServer()
     waitFor server.serve(port = Port(port), callback = main_dispatch, address = address)

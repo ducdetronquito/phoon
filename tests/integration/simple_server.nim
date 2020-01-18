@@ -4,31 +4,31 @@ var app = new App
 
 app.get("/",
     proc (context: Context) {.async.} =
-        context.response.body = "I am a boring home page"
+        context.response.body("I am a boring home page")
 )
 
 app.post("/about",
     proc (context: Context) {.async.} =
-        context.response.status_code = Http201
-        context.response.body = "What are you talking about ?"
+        context.response.status(Http201)
+        context.response.body("What are you talking about ?")
 )
 
 app.get("/ab*",
     proc (context: Context) {.async.} =
-        context.response.body = "I am a wildard page !"
+        context.response.body("I am a wildard page !")
 )
 
 
 app.get("/books/{title}",
     proc (context: Context) {.async.} =
         var book_title = context.parameters.get("title")
-        context.response.body = "Of course I read '" & book_title & "' !"
+        context.response.body("Of course I read '" & book_title & "' !")
 )
 
 app.get("/json",
     proc (context: Context) {.async.} =
         context.response.headers.add("Content-Type", "application/json")
-        context.response.body = "{}"
+        context.response.body("{}")
 )
 
 
@@ -37,7 +37,7 @@ var sub_router = Router()
 
 sub_router.get("/users",
     proc (context: Context) {.async.} =
-        context.response.body = "Here are some nice users"
+        context.response.body("Here are some nice users")
 )
 
 app.mount("/nice", sub_router)
@@ -47,7 +47,7 @@ var authenticated_router = Router()
 
 authenticated_router.get("/",
     proc (context: Context) {.async.} =
-        context.response.body = "Admins, he is doing it sideways !"
+        context.response.body("Admins, he is doing it sideways !")
 )
 
 
@@ -56,7 +56,7 @@ proc SimpleAuthMiddleware(callback: Callback): Callback =
         if context.request.headers.hasKey("simple-auth"):
             await callback(context)
         else:
-            context.response.status_code = Http401
+            context.response.status(Http401)
 
 
 authenticated_router.use(SimpleAuthMiddleware)
