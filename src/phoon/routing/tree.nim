@@ -151,7 +151,6 @@ proc insert*[T](self: var Tree, path: string, value: T) =
 
     for index, character in path:
         var character: char = character
-        var path_type: PathType = PathType.Strict
         # ----- Collect paramater name ----
         if character == '{':
             if not parameter_parsing_enabled:
@@ -228,7 +227,6 @@ type
     LookupContext[T] = ref object
         path: string
         current_path_index: int
-        potential_matches: seq[Node[T]]
         collected_parameters: seq[string]
 
 
