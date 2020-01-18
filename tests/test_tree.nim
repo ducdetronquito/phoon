@@ -40,7 +40,7 @@ suite "Strict routes":
         let result = tree.match("/users").get()
         check(result.value == "Bobby")
 
-    test "Insert multiple routes":
+    test "Can insert longer overlapping routes afterward":
         var tree = Tree[string].new()
 
         tree.insert("/", "Home")
@@ -48,7 +48,18 @@ suite "Strict routes":
         tree.insert("/users/age", "42")
 
         check(tree.match("/").get().value == "Home")
-        #check(tree.match("/users").get().value == "Bobby")
+        check(tree.match("/users").get().value == "Bobby")
+        check(tree.match("/users/age").get().value == "42")
+
+    test "Can insert longer overlapping routes beforehand":
+        var tree = Tree[string].new()
+
+        tree.insert("/users/age", "42")
+        tree.insert("/users", "Bobby")
+        tree.insert("/", "Home")
+
+        check(tree.match("/").get().value == "Home")
+        check(tree.match("/users").get().value == "Bobby")
         check(tree.match("/users/age").get().value == "42")
 
     test "Fail to retrieve an undefined route.":

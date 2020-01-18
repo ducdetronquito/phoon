@@ -108,6 +108,13 @@ proc find_child_by_path[T](self: Node[T], path: char): Option[Node[T]] =
     return none(Node[T])
 
 
+proc remove_child_by_path[T](self: Node[T], path: char) =
+    for index, child in self.children:
+        if child.path == path:
+            self.children.del(index)
+            return
+
+
 proc check_illegal_patterns(path: string) =
     if not path.contains("*"):
         return
@@ -168,16 +175,32 @@ proc insert*[T](self: var Tree, path: string, value: T) =
         if parameter_name.len() > 0:
             character = '{'
 
-        let matching_node = current_node.find_child_by_path(character)
-        if matching_node.isSome:
-            current_node = matching_node.get()
-            if current_node.path_type == PathType.Parametrized and current_node.parameter_name != parameter_name:
+        let is_last_character = index == path.len() - 1
+        let potential_child = current_node.find_child_by_path(character)
+        if potential_child.isSome:
+            var next_child = potential_child.get()
+            if next_child.path_type == PathType.Strict and is_last_character:
+                current_node.remove_child_by_path(character)
+                self.add_children(
+                    current_node,
+                    Node[T](
+                        path: character,
+                        path_type: PathType.Strict,
+                        is_leaf: true,
+                        parameters: parameters,
+                        children: next_child.children,
+                        value: some(value)
+                    )
+                )
+                break
+
+            if next_child.path_type == PathType.Parametrized and next_child.parameter_name != parameter_name:
                 raise InvalidPathError(msg : "You cannot define the same route with two different parameter names.")
             else:
+                current_node = next_child
                 continue
 
         var child: Node[T]
-        let is_last_character = index == path.len() - 1
         if parameter_name.len() > 0:
             if is_last_character:
                 child = Node[T](path: character, path_type: PathType.Parametrized, parameter_name: parameter_name, is_leaf: true, parameters: parameters)
