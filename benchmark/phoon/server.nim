@@ -11,13 +11,12 @@ app.get("/",
 app.get("/users/{id}/",
     proc (ctx: Context) {.async.} =
         let user_id = ctx.parameters.get("id")
-        ctx.response.body = user_id
+        ctx.response.body(user_id)
 )
 
 app.post("/users/",
     proc (ctx: Context) {.async.} =
-        ctx.response.status_code = Http201
-        ctx.response.body = user_id
+        ctx.response.status_code(Http201).body(user_id)
 
 )
 

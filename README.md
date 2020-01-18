@@ -87,13 +87,13 @@ app.not_found(
 # Define a custom callback that is called when an unexpected HTTP method is used on a registered route.
 app.method_not_allowed(
     proc (ctx: Context) {.async.} =
-        ctx.response.status(http405).body("Method Not Allowed ¯\\_(ツ)_/¯")
+        ctx.response.status(Http405).body("Method Not Allowed ¯\\_(ツ)_/¯")
 )
 
 # Define a custom callback that is called when unhandled exceptions are raised in your code.
 app.bad_request(
     proc (ctx: Context) {.async.} =
-        ctx.response.status(http500).body("Bad Request ¯\\_(ツ)_/¯")
+        ctx.response.status(Http500).body("Bad Request ¯\\_(ツ)_/¯")
 )
 ```
 
