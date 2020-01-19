@@ -153,7 +153,7 @@ suite "Endpoints":
 
         proc TeapotMiddleware(callback: Callback): Callback =
             return proc (ctx: Context) {.async.} =
-                if ctx.request.url.path != "teapot":
+                if ctx.request.path() != "teapot":
                     ctx.response.status(Http418)
                     return
                 await callback(ctx)
@@ -177,7 +177,7 @@ suite "Endpoints":
 
         proc TeapotMiddleware(callback: Callback): Callback =
             return proc (ctx: Context) {.async.} =
-                if ctx.request.url.path != "teapot":
+                if ctx.request.path() != "teapot":
                     ctx.response.status(Http418)
                     return
                 await callback(ctx)

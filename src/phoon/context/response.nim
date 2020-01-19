@@ -1,5 +1,4 @@
 import asynchttpserver
-import routing/tree
 
 
 type
@@ -29,14 +28,3 @@ proc get_status*(self: Response): HttpCode =
 proc status*(self: Response, status: HttpCode): Response {.discardable.} =
     self.status_code = status
     return self
-
-
-type
-    Context* = ref object
-        request*: Request
-        parameters*: Parameters
-        response*: Response
-
-
-proc from_request*(context_type: type[Context], request: Request): Context =
-    return Context(request: request, response: Response.new())

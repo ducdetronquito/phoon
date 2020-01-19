@@ -16,9 +16,7 @@ app.get("/users/{id}/",
 
 app.post("/users/",
     proc (ctx: Context) {.async.} =
-        ctx.response.status_code(Http201).body(user_id)
-
+        ctx.response.status(Http201)
 )
-
 
 app.serve()
