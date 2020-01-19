@@ -1,8 +1,9 @@
-import asynchttpserver
+from asynchttpserver import nil
 import asyncdispatch
-import phoon/context
-import phoon/routing/[errors, route, router, tree]
+import httpcore
 import options
+import phoon/context/[context, request, response]
+import phoon/routing/[errors, route, router, tree]
 
 
 type
@@ -105,9 +106,7 @@ proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.
 
 
 proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
-    let path = ctx.request.url.path
-
-    let potential_match = self.routing_table.match(path)
+    let potential_match = self.routing_table.match(ctx.request.path())
     if potential_match.isNone:
         {.gcsafe.}:
             let response = await fail_safe(self, self.not_found_callback, ctx)
@@ -115,7 +114,7 @@ proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
 
     let match = potential_match.get()
     let route = match.value
-    let callback = route.get_callback_of(ctx.request.reqMethod)
+    let callback = route.get_callback_of(ctx.request.http_method())
     if callback.isNone:
         {.gcsafe.}:
             let response = await fail_safe(self, self.method_not_allowed_callback, ctx)
@@ -135,22 +134,25 @@ proc serve*(self: App, port: int, address: string = "") =
     var app = deepCopy(self)
     app.compile_routes()
 
-    proc main_dispatch(request: Request) {.async, gcsafe.} =
+    proc main_dispatch(request: asynchttpserver.Request) {.async, gcsafe.} =
         var ctx = Context.from_request(request)
         let response = await app.dispatch(ctx)
-        await request.respond(response.get_status(), response.get_body(), response.headers)
+        await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.headers)
 
-    let server = newAsyncHttpServer()
-    waitFor server.serve(port = Port(port), callback = main_dispatch, address = address)
+    let server = asynchttpserver.newAsyncHttpServer()
+    waitFor asynchttpserver.serve(server, port = Port(port), callback = main_dispatch, address = address)
 
 
 proc serve*(self: App) =
     self.serve(8080)
 
-export asynchttpserver
+
 export asyncdispatch
 export context
 export errors
+export httpcore
+export request
+export response
 export route
 export router
 export tree

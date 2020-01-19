@@ -30,6 +30,12 @@ app.get("/json",
         ctx.response.body("{}")
 )
 
+app.get("/query_parameters/",
+    proc (ctx: Context) {.async.} =
+        let name = ctx.request.query("name").get()
+        ctx.response.body(name)
+)
+
 
 
 var sub_router = Router()
