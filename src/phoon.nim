@@ -64,6 +64,11 @@ proc put*(self: App, path: string, callback: Callback) =
     self.router.put(path, callback)
 
 
+proc route*(self: App, path: string): Route {.discardable.} =
+    var route = self.router.route(path)
+    return route
+
+
 proc mount*(self: App, path: string, router: Router) =
     self.router.mount(path, router)
 

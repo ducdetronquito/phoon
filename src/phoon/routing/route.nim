@@ -19,6 +19,41 @@ type
         put_callback*: Option[Callback]
 
 
+proc delete*(self: Route, callback: Callback): Route {.discardable.} =
+    self.delete_callback = some(callback)
+    return self
+
+
+proc get*(self: Route, callback: Callback): Route {.discardable.} =
+    self.get_callback = some(callback)
+    return self
+
+
+proc head*(self: Route, callback: Callback): Route {.discardable.} =
+    self.head_callback = some(callback)
+    return self
+
+
+proc options*(self: Route, callback: Callback): Route {.discardable.} =
+    self.options_callback = some(callback)
+    return self
+
+
+proc patch*(self: Route, callback: Callback): Route {.discardable.} =
+    self.patch_callback = some(callback)
+    return self
+
+
+proc post*(self: Route, callback: Callback): Route {.discardable.} =
+    self.post_callback = some(callback)
+    return self
+
+
+proc put*(self: Route, callback: Callback): Route {.discardable.} =
+    self.put_callback = some(callback)
+    return self
+
+
 proc get_callback_of*(route: Route, http_method: HttpMethod): Option[Callback] =
     case http_method
     of HttpMethod.HttpDelete:
