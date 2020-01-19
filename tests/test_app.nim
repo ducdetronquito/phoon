@@ -113,6 +113,28 @@ suite "Endpoints":
         let response = waitFor app.dispatch(ctx)
         check(response.get_status() == Http201)
 
+
+    test "Can chain route definitions":
+        var app = App.new()
+        app.route("/memes")
+            .get(
+                proc (ctx: Context) {.async.} =
+                    discard
+            )
+            .post(
+                proc (ctx: Context) {.async.} =
+                    ctx.response.status(Http201)
+            )
+        app.compile_routes()
+
+        var ctx = Context.from_request(PostRequest("https://yumad.bro/memes"))
+        var response = waitFor app.dispatch(ctx)
+        check(response.get_status() == Http201)
+
+        ctx = Context.from_request(GetRequest("https://yumad.bro/memes"))
+        response = waitFor app.dispatch(ctx)
+        check(response.get_status() == Http200)
+
     test "Can define a nested router":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()

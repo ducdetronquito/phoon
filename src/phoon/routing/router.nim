@@ -74,6 +74,12 @@ proc put*(self: Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
+proc route*(self: Router, path: string): Route {.discardable.} =
+    var route = Route()
+    self.routes.add(path, route)
+    return route
+
+
 iterator get_route_pairs*(self: Router): tuple[path: string, route: Route] =
     for path, route in self.routes.pairs:
         yield (path, route)
