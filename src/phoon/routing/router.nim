@@ -11,7 +11,7 @@ type
         middlewares: seq[Middleware]
 
 
-proc delete*(self: var Router, path: string, callback: Callback) =
+proc delete*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].delete_callback = some(callback)
         return
@@ -20,7 +20,7 @@ proc delete*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc get*(self: var Router, path: string, callback: Callback) =
+proc get*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].get_callback = some(callback)
         return
@@ -29,7 +29,7 @@ proc get*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc head*(self: var Router, path: string, callback: Callback) =
+proc head*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].head_callback = some(callback)
         return
@@ -38,7 +38,7 @@ proc head*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc options*(self: var Router, path: string, callback: Callback) =
+proc options*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].options_callback = some(callback)
         return
@@ -47,7 +47,7 @@ proc options*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc patch*(self: var Router, path: string, callback: Callback) =
+proc patch*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].patch_callback = some(callback)
         return
@@ -56,7 +56,7 @@ proc patch*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc post*(self: var Router, path: string, callback: Callback) =
+proc post*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].post_callback = some(callback)
         return
@@ -65,7 +65,7 @@ proc post*(self: var Router, path: string, callback: Callback) =
     self.routes.add(path, route)
 
 
-proc put*(self: var Router, path: string, callback: Callback) =
+proc put*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
         self.routes[path].put_callback = some(callback)
         return
@@ -83,7 +83,7 @@ proc get_middlewares*(self: Router): seq[Middleware] =
     return self.middlewares
 
 
-proc mount*(self: var Router, path: string, router: Router) =
+proc mount*(self: Router, path: string, router: Router) =
     if path.contains("*"):
         raise InvalidPathError(msg: "Cannot mount a sub-router on a wildcard route.")
 

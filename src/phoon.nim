@@ -36,51 +36,51 @@ proc new*(app_type: type[App]): App =
     )
 
 
-proc head*(self: var App, path: string, callback: Callback) =
+proc head*(self: App, path: string, callback: Callback) =
     self.router.head(path, callback)
 
 
-proc delete*(self: var App, path: string, callback: Callback) =
+proc delete*(self: App, path: string, callback: Callback) =
     self.router.delete(path, callback)
 
 
-proc get*(self: var App, path: string, callback: Callback) =
+proc get*(self: App, path: string, callback: Callback) =
     self.router.get(path, callback)
 
 
-proc options*(self: var App, path: string, callback: Callback) =
+proc options*(self: App, path: string, callback: Callback) =
     self.router.options(path, callback)
 
 
-proc patch*(self: var App, path: string, callback: Callback) =
+proc patch*(self: App, path: string, callback: Callback) =
     self.router.patch(path, callback)
 
 
-proc post*(self: var App, path: string, callback: Callback) =
+proc post*(self: App, path: string, callback: Callback) =
     self.router.post(path, callback)
 
 
-proc put*(self: var App, path: string, callback: Callback) =
+proc put*(self: App, path: string, callback: Callback) =
     self.router.put(path, callback)
 
 
-proc mount*(self: var App, path: string, router: Router) =
+proc mount*(self: App, path: string, router: Router) =
     self.router.mount(path, router)
 
 
-proc bad_request*(self: var App, callback: Callback) =
+proc bad_request*(self: App, callback: Callback) =
     self.bad_request_callback = callback
 
 
-proc not_found*(self: var App, callback: Callback) =
+proc not_found*(self: App, callback: Callback) =
     self.not_found_callback = callback
 
 
-proc method_not_allowed*(self: var App, callback: Callback) =
+proc method_not_allowed*(self: App, callback: Callback) =
     self.method_not_allowed_callback = callback
 
 
-proc compile_routes*(self: var App) =
+proc compile_routes*(self: App) =
     let middlewares = self.router.get_middlewares()
 
     for path, route in self.router.get_route_pairs():

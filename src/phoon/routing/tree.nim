@@ -136,12 +136,12 @@ proc by_path_type_order[T](x: Node[T], y: Node[T]): int =
     return -1
 
 
-proc add_children[T](self: var Tree[T], parent: var Node[T], child: Node[T]) =
+proc add_children[T](self: Tree[T], parent: Node[T], child: Node[T]) =
     parent.children.add(child)
     parent.children.sort(by_path_type_order[T])
 
 
-proc insert*[T](self: var Tree, path: string, value: T) =
+proc insert*[T](self: Tree, path: string, value: T) =
     path.check_illegal_patterns()
 
     var current_node = self.root
@@ -234,7 +234,7 @@ proc path_is_fully_parsed[T](self: LookupContext[T]): bool =
     return self.path.len() == self.current_path_index
 
 
-proc match[T](self: Node[T], context: var LookupContext[T]): bool =
+proc match[T](self: Node[T], context: LookupContext[T]): bool =
     case self.path_type:
     of PathType.Strict:
         if self.path == context.path[context.current_path_index]:
