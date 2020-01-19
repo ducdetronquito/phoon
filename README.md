@@ -35,9 +35,36 @@ app.get("/us*",
 
 app.get("/books/{title}",
     proc (ctx: Context) {.async.} =
+        # You can retrieve parameters of the URL path
         var book_title = ctx.parameters.get("title")
-        ctx.response.body("Of course I read '" & book_title & "' !")
+
+        # You can also retrieve url-decoded query parameters
+        let count = ctx.request.query("count")
+        if count.isNone:
+            ctx.response.body("Of course I read '" & book_title & "' !")
+        else:
+            ctx.response.body(
+                "Of course I read '" & book_title & "', "
+                "at least " & count & " times!"
+            )
 )
+
+
+# Chaining of callbacks for a given path
+app.route("/hacks")
+    .get(
+        proc (ctx: Context) {.async.} =
+            ctx.response.body("I handle GET requests")
+    )
+    .patch(
+        proc (ctx: Context) {.async.} =
+            ctx.response.body("I handle PATCH requests")
+    )
+    .delete(
+        proc (ctx: Context) {.async.} =
+            ctx.response.body("I handle DELETE requests")
+    )
+
 
 app.serve(8080)
 ```
@@ -63,7 +90,7 @@ app.mount("/nice", sub_router)
 import phoon
 
 proc SimpleAuthMiddleware(callback: Callback): Callback =
-    return proc (ctx: Context)  {.async.} =
+    return proc (ctx: Context) {.async.} =
         if ctx.request.headers.hasKey("simple-auth"):
             await callback(ctx)
         else:
