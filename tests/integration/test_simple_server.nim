@@ -54,3 +54,7 @@ suite "Integration tests":
     test "Can retrieve the response headers":
         let response = client.get("http://localhost:3000/json")
         check(response.headers["content-type"] == "application/json")
+
+    test "Can access query parameters":
+        let response = client.get("http://localhost:3000/query_parameters/?name=G%C3%BCnter")
+        check(response.body == "Günter")
