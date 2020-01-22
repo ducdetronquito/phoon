@@ -135,6 +135,8 @@ suite "Endpoints":
         response = waitFor app.dispatch(ctx)
         check(response.get_status() == Http200)
 
+
+suite "Nested router":
     test "Can define a nested router":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
         var app = App.new()
@@ -164,6 +166,8 @@ suite "Endpoints":
         doAssertRaises(InvalidPathError):
             app.mount("/api/*", router)
 
+
+suite "Middlewares":
     test "Can register a middleware":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
         var app = App.new()
@@ -353,3 +357,18 @@ suite "Error handling":
         let response = waitFor app.dispatch(ctx)
         check(response.get_status() == Http500)
         check(response.get_body() == "ᕕ( ᐛ )ᕗ")
+
+
+suite "Cookies":
+
+    test "Add a cookie":
+        var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (ctx: Context) {.async.} =
+                ctx.response.cookie("name", "Yay")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(ctx)
+        check(response.get_status() == Http200)
+        check(response.get_headers()["set-cookie"] == "name=Yay")

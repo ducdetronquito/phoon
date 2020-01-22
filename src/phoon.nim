@@ -65,12 +65,15 @@ proc put*(self: App, path: string, callback: Callback) =
 
 
 proc route*(self: App, path: string): Route {.discardable.} =
-    var route = self.router.route(path)
-    return route
+    return self.router.route(path)
 
 
 proc mount*(self: App, path: string, router: Router) =
     self.router.mount(path, router)
+
+
+proc use*(self: App, middleware: Middleware) =
+    self.router.use(middleware)
 
 
 proc bad_request*(self: App, callback: Callback) =
@@ -89,8 +92,8 @@ proc compile_routes*(self: App) =
     let middlewares = self.router.get_middlewares()
 
     for path, route in self.router.get_route_pairs():
-        var compile_route = route.apply(middlewares)
-        self.routing_table.insert(path, compile_route)
+        var compiled_route = route.apply(middlewares)
+        self.routing_table.insert(path, compiled_route)
 
 
 proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.async.} =
@@ -115,7 +118,7 @@ proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
     if potential_match.isNone:
         {.gcsafe.}:
             let response = await fail_safe(self, self.not_found_callback, ctx)
-            return response
+            return response.compile()
 
     let match = potential_match.get()
     let route = match.value
@@ -123,16 +126,12 @@ proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
     if callback.isNone:
         {.gcsafe.}:
             let response = await fail_safe(self, self.method_not_allowed_callback, ctx)
-            return response
+            return response.compile()
 
     ctx.parameters = match.parameters
     {.gcsafe.}:
         let response = await fail_safe(self, callback.get(), ctx)
-        return response
-
-
-proc use*(self: App, middleware: Middleware) =
-    self.router.use(middleware)
+        return response.compile()
 
 
 proc serve*(self: App, port: int, address: string = "") =
@@ -142,7 +141,7 @@ proc serve*(self: App, port: int, address: string = "") =
     proc main_dispatch(request: asynchttpserver.Request) {.async, gcsafe.} =
         var ctx = Context.from_request(request)
         let response = await app.dispatch(ctx)
-        await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.headers)
+        await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
 
     let server = asynchttpserver.newAsyncHttpServer()
     waitFor asynchttpserver.serve(server, port = Port(port), callback = main_dispatch, address = address)
@@ -157,7 +156,7 @@ export context
 export errors
 export httpcore
 export request
-export response
+export response except compile
 export route
 export router
 export tree

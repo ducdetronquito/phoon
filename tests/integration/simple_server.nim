@@ -26,7 +26,7 @@ app.get("/books/{title}",
 
 app.get("/json",
     proc (ctx: Context) {.async.} =
-        ctx.response.headers.add("Content-Type", "application/json")
+        ctx.response.headers("Content-Type", "application/json")
         ctx.response.body("{}")
 )
 
@@ -36,6 +36,11 @@ app.get("/query_parameters/",
         ctx.response.body(name)
 )
 
+
+app.get("/cookies/",
+    proc (ctx: Context) {.async.} =
+        ctx.response.cookie("name", "Yay")
+)
 
 
 var sub_router = Router()
