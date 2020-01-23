@@ -58,3 +58,7 @@ suite "Integration tests":
     test "Can access query parameters":
         let response = client.get("http://localhost:3000/query_parameters/?name=G%C3%BCnter")
         check(response.body == "Günter")
+
+    test "Can access cookies":
+        let response = client.get("http://localhost:3000/cookies/")
+        check(response.headers["set-cookie"] == "name=Yay")

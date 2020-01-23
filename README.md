@@ -49,6 +49,12 @@ app.get("/books/{title}",
             )
 )
 
+app.get("/cookies/",
+    proc (ctx: Context) {.async.} =
+        # You can send a cookie along the response
+        ctx.response.cookie("size", "A big one 🍪")
+)
+
 
 # Chaining of callbacks for a given path
 app.route("/hacks")
