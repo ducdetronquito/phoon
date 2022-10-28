@@ -8,7 +8,7 @@ license       = "Public Domain"
 srcDir = "src"
 skipDirs = @["benchmark", "tests"]
 
-requires "nim >= 1.0.2"
+requires "nim >= 1.6"
 
 task integration, "Runs the integration test suite.":
   exec "nim c -r tests/integration/test_simple_server.nim"
