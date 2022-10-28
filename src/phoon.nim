@@ -1,5 +1,5 @@
 from asynchttpserver import nil
-import asyncdispatch
+import asyncdispatch except Callback
 import httpcore
 import options
 import phoon/context/[context, request, response]
@@ -151,7 +151,7 @@ proc serve*(self: App) =
     self.serve(8080)
 
 
-export asyncdispatch
+export asyncdispatch except Callback
 export context
 export errors
 export httpcore
