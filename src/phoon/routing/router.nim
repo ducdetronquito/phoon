@@ -17,7 +17,7 @@ proc delete*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(delete_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] =  route
 
 
 proc get*(self: Router, path: string, callback: Callback) =
@@ -26,7 +26,7 @@ proc get*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(get_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc head*(self: Router, path: string, callback: Callback) =
@@ -35,7 +35,7 @@ proc head*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(head_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc options*(self: Router, path: string, callback: Callback) =
@@ -44,7 +44,7 @@ proc options*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(options_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc patch*(self: Router, path: string, callback: Callback) =
@@ -53,7 +53,7 @@ proc patch*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(patch_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc post*(self: Router, path: string, callback: Callback) =
@@ -62,7 +62,7 @@ proc post*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(post_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc put*(self: Router, path: string, callback: Callback) =
@@ -71,12 +71,12 @@ proc put*(self: Router, path: string, callback: Callback) =
         return
 
     var route = Route(put_callback: some(callback))
-    self.routes.add(path, route)
+    self.routes[path] = route
 
 
 proc route*(self: Router, path: string): Route {.discardable.} =
     var route = Route()
-    self.routes.add(path, route)
+    self.routes[path] = route
     return route
 
 
@@ -97,7 +97,7 @@ proc mount*(self: Router, path: string, router: Router) =
 
     for sub_path, route in router.get_route_pairs():
         let compiled_route = route.apply(middlewares)
-        self.routes.add(path & sub_path, compiled_route)
+        self.routes[path & sub_path] = compiled_route
 
 
 proc use*(self: Router, middleware: Middleware) =
