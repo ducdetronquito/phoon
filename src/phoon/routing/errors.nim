@@ -1,2 +1,2 @@
 type
-    InvalidPathError* = ref object of Exception
+    InvalidPathError* = ref object of ValueError
