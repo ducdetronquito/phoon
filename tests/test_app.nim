@@ -372,3 +372,19 @@ suite "Cookies":
         let response = waitFor app.dispatch(ctx)
         check(response.get_status() == Http200)
         check(response.get_headers()["set-cookie"] == "name=Yay")
+
+    test "Add multiple cookies":
+        var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
+        var app = App.new()
+        app.get("/",
+            proc (ctx: Context) {.async.} =
+                ctx.response.cookie("name", "Yay")
+                ctx.response.cookie("surname", "Nay")
+        )
+        app.compile_routes()
+        let response = waitFor app.dispatch(ctx)
+
+        check(response.get_status() == Http200)
+        var headers = response.get_headers()
+        check(headers["set-cookie", 0] == "name=Yay")
+        check(headers["set-cookie", 1] == "surname=Nay")

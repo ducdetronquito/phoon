@@ -117,21 +117,18 @@ proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
     let potential_match = self.routing_table.match(ctx.request.path())
     if potential_match.isNone:
         {.gcsafe.}:
-            let response = await fail_safe(self, self.not_found_callback, ctx)
-            return response.compile()
+            return await fail_safe(self, self.not_found_callback, ctx)
 
     let match = potential_match.get()
     let route = match.value
     let callback = route.get_callback_of(ctx.request.http_method())
     if callback.isNone:
         {.gcsafe.}:
-            let response = await fail_safe(self, self.method_not_allowed_callback, ctx)
-            return response.compile()
+            return await fail_safe(self, self.method_not_allowed_callback, ctx)
 
     ctx.parameters = match.parameters
     {.gcsafe.}:
-        let response = await fail_safe(self, callback.get(), ctx)
-        return response.compile()
+        return await fail_safe(self, callback.get(), ctx)
 
 
 proc serve*(self: App, port: int, address: string = "") =

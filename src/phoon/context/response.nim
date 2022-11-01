@@ -2,21 +2,10 @@ import asynchttpserver
 
 
 type
-    Cookie = object
-        name: string
-        value: string
-
-
-proc to_string*(self: Cookie): string =
-    return self.name & "=" & self.value
-
-
-type
     Response* = ref object
         status: HttpCode
         body: string
         headers: HttpHeaders
-        cookies: seq[Cookie]
 
 
 proc get_body*(self: Response): string =
@@ -29,16 +18,6 @@ proc get_status*(self: Response): HttpCode =
 
 proc get_headers*(self: Response): HttpHeaders =
     return self.headers
-
-
-proc compile*(self: Response): Response =
-    if len(self.cookies) == 0:
-        return self
-
-    for cookie in self.cookies:
-        self.headers["Set-Cookie"] = cookie.to_string()
-
-    return self
 
 
 proc new*(response_type: type[Response]): Response =
@@ -61,5 +40,5 @@ proc headers*(self: Response, key: string, value: string): Response {.discardabl
 
 
 proc cookie*(self: Response, name: string, value: string): Response {.discardable.} =
-    self.cookies.add(Cookie(name: name, value: value))
+    self.headers.add("Set-Cookie", name & "=" & value)
     return self
