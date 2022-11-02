@@ -6,7 +6,7 @@ description   = "A web framework inspired by ExpressJS 🐇⚡"
 license       = "Public Domain"
 
 srcDir = "src"
-skipDirs = @["benchmark", "tests"]
+skipDirs = @["tests"]
 
 requires "nim >= 1.6"
 
