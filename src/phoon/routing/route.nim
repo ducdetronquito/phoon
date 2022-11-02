@@ -7,7 +7,7 @@ import options
 type
     Callback* = proc(ctx: Context): Future[void]
 
-    Middleware* = proc (callback: Callback): Callback
+    Middleware* = proc (next: Callback): Callback
 
     Route* = ref object
         delete_callback*: Option[Callback]

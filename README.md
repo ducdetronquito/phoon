@@ -95,10 +95,10 @@ app.mount("/nice", sub_router)
 ```nim
 import phoon
 
-proc SimpleAuthMiddleware(callback: Callback): Callback =
+proc SimpleAuthMiddleware(next: Callback): Callback =
     return proc (ctx: Context) {.async.} =
         if ctx.request.headers.hasKey("simple-auth"):
-            await callback(ctx)
+            await next(ctx)
         else:
             ctx.response.status(Http401)
 

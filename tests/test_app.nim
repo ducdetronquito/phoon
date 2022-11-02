@@ -177,12 +177,12 @@ suite "Middlewares":
                 discard
         )
 
-        proc TeapotMiddleware(callback: Callback): Callback =
+        proc TeapotMiddleware(next: Callback): Callback =
             return proc (ctx: Context) {.async.} =
                 if ctx.request.path() != "teapot":
                     ctx.response.status(Http418)
                     return
-                await callback(ctx)
+                await next(ctx)
 
         app.use(TeapotMiddleware)
 
