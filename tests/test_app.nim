@@ -281,7 +281,7 @@ suite "Error handling":
             proc (ctx: Context) {.async.} =
                 discard
         )
-        app.not_found(
+        app.on404(
             proc (ctx: Context) {.async.} =
                 ctx.response.status(Http404).body("¯\\_(ツ)_/¯")
         )
@@ -297,7 +297,7 @@ suite "Error handling":
             proc (ctx: Context) {.async.} =
                 discard
         )
-        app.not_found(
+        app.on404(
             proc (ctx: Context) {.async.} =
                 discard parseInt("Not a number")
         )

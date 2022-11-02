@@ -112,7 +112,7 @@ app.use(SimpleAuthMiddleware)
 import phoon
 
 # Define a custom callback that is called when no registered route matched the incoming request path.
-app.not_found(
+app.on404(
     proc (ctx: Context) {.async.} =
         ctx.response.status(Http404).body("Not Found ¯\\_(ツ)_/¯")
 )

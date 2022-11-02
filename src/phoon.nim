@@ -11,14 +11,14 @@ type
         router: Router
         routing_table: Tree[Route]
         bad_request_callback*: Callback
-        not_found_callback*: Callback
+        on404: Callback
         method_not_allowed_callback*: Callback
 
 proc default_bad_request_callback(ctx: Context) {.async.} =
     ctx.response.status(Http500)
 
 
-proc default_not_found_callback(ctx: Context) {.async.} =
+proc default404callback(ctx: Context) {.async.} =
     ctx.response.status(Http404)
 
 
@@ -31,7 +31,7 @@ proc new*(app_type: type[App]): App =
         router: Router(),
         routing_table: new Tree[Route],
         bad_request_callback: default_bad_request_callback,
-        not_found_callback: default_not_found_callback,
+        on404: default404callback,
         method_not_allowed_callback: default_method_not_allowed_callback
     )
 
@@ -80,8 +80,8 @@ proc bad_request*(self: App, callback: Callback) =
     self.bad_request_callback = callback
 
 
-proc not_found*(self: App, callback: Callback) =
-    self.not_found_callback = callback
+proc on404*(self: App, callback: Callback) =
+    self.on404 = callback
 
 
 proc method_not_allowed*(self: App, callback: Callback) =
@@ -116,7 +116,7 @@ proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.
 proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
     let potential_match = self.routing_table.match(ctx.request.path())
     if potential_match.isNone:
-        return await fail_safe(self, self.not_found_callback, ctx)
+        return await fail_safe(self, self.on404, ctx)
 
     let match = potential_match.get()
     let route = match.value
