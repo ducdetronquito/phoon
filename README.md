@@ -117,16 +117,10 @@ app.on404(
         ctx.response.status(Http404).body("Not Found ¯\\_(ツ)_/¯")
 )
 
-# Define a custom callback that is called when an unexpected HTTP method is used on a registered route.
-app.method_not_allowed(
-    proc (ctx: Context) {.async.} =
-        ctx.response.status(Http405).body("Method Not Allowed ¯\\_(ツ)_/¯")
-)
-
-# Define a custom callback that is called when unhandled exceptions are raised in your code.
-app.bad_request(
-    proc (ctx: Context) {.async.} =
-        ctx.response.status(Http500).body("Bad Request ¯\\_(ツ)_/¯")
+# Define a custom callback that is called when an unhandled exception is raised within your code.
+app.onError(
+    proc (ctx: Context, error: ref Exception) {.async.} =
+        ctx.response.status(Http500).body("Oops ¯\\_(ツ)_/¯\r\n" & error.msg)
 )
 ```
 

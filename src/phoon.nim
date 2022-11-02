@@ -7,14 +7,16 @@ import phoon/routing/[errors, route, router, tree]
 
 
 type
+    ErrorCallback = proc(ctx: Context, error: ref Exception): Future[void]
+
     App* = ref object
         router: Router
         routing_table: Tree[Route]
-        bad_request_callback*: Callback
-        on404: Callback
-        method_not_allowed_callback*: Callback
+        errorCallback: ErrorCallback
+        routeNotFound: Callback
 
-proc default_bad_request_callback(ctx: Context) {.async.} =
+
+proc defaultErrorCallback(ctx: Context, error: ref Exception) {.async.} =
     ctx.response.status(Http500)
 
 
@@ -22,17 +24,12 @@ proc default404callback(ctx: Context) {.async.} =
     ctx.response.status(Http404)
 
 
-proc default_method_not_allowed_callback(ctx: Context) {.async.} =
-    ctx.response.status(Http405)
-
-
 proc new*(app_type: type[App]): App =
     return App(
         router: Router(),
         routing_table: new Tree[Route],
-        bad_request_callback: default_bad_request_callback,
-        on404: default404callback,
-        method_not_allowed_callback: default_method_not_allowed_callback
+        errorCallback: defaultErrorCallback,
+        routeNotFound: default404callback,
     )
 
 
@@ -76,16 +73,12 @@ proc use*(self: App, middleware: Middleware) =
     self.router.use(middleware)
 
 
-proc bad_request*(self: App, callback: Callback) =
-    self.bad_request_callback = callback
+proc onError*(self: App, callback: ErrorCallback) =
+    self.errorCallback = callback
 
 
 proc on404*(self: App, callback: Callback) =
-    self.on404 = callback
-
-
-proc method_not_allowed*(self: App, callback: Callback) =
-    self.method_not_allowed_callback = callback
+    self.routeNotFound = callback
 
 
 proc compile_routes*(self: App) =
@@ -96,36 +89,29 @@ proc compile_routes*(self: App) =
         self.routing_table.insert(path, compiled_route)
 
 
-proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.async.} =
-    let callback_future = callback(ctx)
-    yield callback_future
-    if not callback_future.failed:
-        return ctx.response
-
-    ctx.response = Response.new()
-
-    let bad_request_future = self.bad_request_callback(ctx)
-    yield bad_request_future
-    if not bad_request_future.failed:
-        return ctx.response
-
-    await default_bad_request_callback(ctx)
-    return ctx.response
-
-
-proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
+proc unsafeDispatch(self: App, ctx: Context) {.async.} =
     let potential_match = self.routing_table.match(ctx.request.path())
     if potential_match.isNone:
-        return await fail_safe(self, self.on404, ctx)
+        await self.routeNotFound(ctx)
+        return
 
     let match = potential_match.get()
     let route = match.value
     let callback = route.get_callback_of(ctx.request.http_method())
     if callback.isNone:
-        return await fail_safe(self, self.method_not_allowed_callback, ctx)
+        ctx.response.status(Http405)
+        return
 
     ctx.parameters = match.parameters
-    return await fail_safe(self, callback.get(), ctx)
+    await callback.unsafeGet()(ctx)
+    return
+
+
+proc dispatch*(self: App, ctx: Context) {.async.} =
+    try:
+        await self.unsafeDispatch(ctx)
+    except Exception as error:
+        await self.errorCallback(ctx, error)
 
 
 proc serve*(self: App, port: int, address: string = "") =
@@ -134,7 +120,8 @@ proc serve*(self: App, port: int, address: string = "") =
     proc dispatch(request: asynchttpserver.Request) {.async.} =
         var ctx = Context.from_request(request)
         {.gcsafe.}:
-            let response = await self.dispatch(ctx)
+            await self.dispatch(ctx)
+        let response = ctx.response
         await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
 
     let server = asynchttpserver.newAsyncHttpServer()

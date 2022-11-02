@@ -1,4 +1,5 @@
 import phoon
+import strutils
 
 var app = new App
 
@@ -42,6 +43,11 @@ app.get("/cookies/",
         ctx.response.cookie("name", "Yay")
 )
 
+app.get("/error/",
+    proc (ctx: Context) {.async.} =
+        discard parseInt("Some business logic that should have been an int")
+)
+
 
 var sub_router = Router()
 
@@ -71,5 +77,8 @@ proc SimpleAuthMiddleware(next: Callback): Callback =
 
 authenticated_router.use(SimpleAuthMiddleware)
 app.mount("/admins", authenticated_router)
-
+app.onError(
+    proc (ctx: Context, error: ref Exception) {.async.} =
+        ctx.response.body(error.msg).status(Http500)
+)
 app.serve(3000)

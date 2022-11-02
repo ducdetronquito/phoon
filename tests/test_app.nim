@@ -14,8 +14,8 @@ suite "Endpoints":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "GET endpoint":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
@@ -25,8 +25,8 @@ suite "Endpoints":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "HEAD endpoint":
         var ctx = Context.from_request(Request(HttpMethod.HttpHead, "https://yumad.bro/"))
@@ -36,8 +36,8 @@ suite "Endpoints":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "OPTIONS endpoint":
         var ctx = Context.from_request(Request(HttpMethod.HttpOptions, "https://yumad.bro/"))
@@ -47,8 +47,8 @@ suite "Endpoints":
                 ctx.response.status(Http204)
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http204)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http204)
 
     test "PATCH endpoint":
         var ctx = Context.from_request(Request(HttpMethod.HttpPatch, "https://yumad.bro/"))
@@ -58,8 +58,8 @@ suite "Endpoints":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "POST endpoint":
         var ctx = Context.from_request(PostRequest("https://yumad.bro/"))
@@ -69,8 +69,8 @@ suite "Endpoints":
                 ctx.response.status(Http201)
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http201)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http201)
 
     test "PUT endpoint":
         var ctx = Context.from_request(Request(HttpMethod.HttpPut, "https://yumad.bro/"))
@@ -80,8 +80,8 @@ suite "Endpoints":
                 ctx.response.status(Http201)
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http201)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http201)
 
     test "Can GET a endpoint already defined to handle POST requests":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/memes"))
@@ -95,8 +95,8 @@ suite "Endpoints":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "Can POST a endpoint already defined to handle GET requests":
         var ctx = Context.from_request(PostRequest("https://yumad.bro/memes"))
@@ -110,8 +110,8 @@ suite "Endpoints":
                 ctx.response.status(Http201)
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http201)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http201)
 
 
     test "Can chain route definitions":
@@ -128,12 +128,12 @@ suite "Endpoints":
         app.compile_routes()
 
         var ctx = Context.from_request(PostRequest("https://yumad.bro/memes"))
-        var response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http201)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http201)
 
         ctx = Context.from_request(GetRequest("https://yumad.bro/memes"))
-        response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
 
 suite "Nested router":
@@ -150,8 +150,8 @@ suite "Nested router":
         app.mount("/api/v1", router)
 
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
 
     test "Cannot define a nested router on a wildcard route":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/api/v1/users"))
@@ -188,8 +188,8 @@ suite "Middlewares":
 
         app.compile_routes()
 
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http418)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http418)
 
     test "Can register a middleware on a sub-router":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/users/"))
@@ -212,8 +212,8 @@ suite "Middlewares":
         app.mount("/users", router)
 
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http418)
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http418)
 
 
 suite "Error handling":
@@ -225,9 +225,9 @@ suite "Error handling":
                 discard parseInt("Some business logic that should have been an int")
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http500)
-        check(response.get_body() == "")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http500)
+        check(ctx.response.get_body() == "")
 
     test "Define a custom HTTP 500 handler":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
@@ -236,31 +236,14 @@ suite "Error handling":
             proc (ctx: Context) {.async.} =
                 discard parseInt("Some business logic that should have been an int")
         )
-        app.bad_request(
-            proc (ctx: Context) {.async.} =
+        app.onError(
+            proc (ctx: Context, error: ref Exception) {.async.} =
                 ctx.response.status(Http500).body("¯\\_(ツ)_/¯")
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http500)
-        check(response.get_body() == "¯\\_(ツ)_/¯")
-
-    test "Fallback to a default Bad Request if the custom HTTP 500 callback fails":
-        var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
-        var app = App.new()
-        app.get("/",
-            proc (ctx: Context) {.async.} =
-                discard parseInt("Some business logic that should have been an int")
-        )
-        app.bad_request(
-            proc (ctx: Context) {.async.} =
-                discard parseInt("Not a number")
-                ctx.response.status(Http500).body("¯\\_(ツ)_/¯")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http500)
-        check(response.get_body() == "")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http500)
+        check(ctx.response.get_body() == "¯\\_(ツ)_/¯")
 
     test "Not found endpoint returns a 404 status code.":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/an-undefined-url"))
@@ -270,9 +253,9 @@ suite "Error handling":
                 discard
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http404)
-        check(response.get_body() == "")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http404)
+        check(ctx.response.get_body() == "")
 
     test "Define a custom HTTP 404 handler":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/an-undefined-url"))
@@ -286,29 +269,9 @@ suite "Error handling":
                 ctx.response.status(Http404).body("¯\\_(ツ)_/¯")
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http404)
-        check(response.get_body() == "¯\\_(ツ)_/¯")
-
-    test "Fallback to a custom Bad Request if the custom HTTP 404 callback fails":
-        var ctx = Context.from_request(GetRequest("https://yumad.bro/an-undefined-url"))
-        var app = App.new()
-        app.get("/",
-            proc (ctx: Context) {.async.} =
-                discard
-        )
-        app.on404(
-            proc (ctx: Context) {.async.} =
-                discard parseInt("Not a number")
-        )
-        app.bad_request(
-            proc (ctx: Context) {.async.} =
-                ctx.response.status(Http500).body("ᕕ( ᐛ )ᕗ")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http500)
-        check(response.get_body() == "ᕕ( ᐛ )ᕗ")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http404)
+        check(ctx.response.get_body() == "¯\\_(ツ)_/¯")
 
     test "Wrong HTTP method on a defined endpoint returns a 405 status code.":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
@@ -318,45 +281,9 @@ suite "Error handling":
                 ctx.response.status(Http201)
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http405)
-        check(response.get_body() == "")
-
-    test "Define a custom HTTP 405 handler":
-        var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
-        var app = App.new()
-        app.post("/",
-            proc (ctx: Context) {.async.} =
-                ctx.response.status(Http201)
-        )
-        app.method_not_allowed(
-            proc (ctx: Context) {.async.} =
-                ctx.response.status(Http405).body("¯\\_(ツ)_/¯")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http405)
-        check(response.get_body() == "¯\\_(ツ)_/¯")
-
-    test "Fallback to a custom Bad Request if the custom HTTP 405 callback fails":
-        var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
-        var app = App.new()
-        app.post("/",
-            proc (ctx: Context) {.async.} =
-                ctx.response.status(Http201)
-        )
-        app.method_not_allowed(
-            proc (ctx: Context) {.async.} =
-                discard parseInt("Not a number")
-        )
-        app.bad_request(
-            proc (ctx: Context) {.async.} =
-                ctx.response.status(Http500).body("ᕕ( ᐛ )ᕗ")
-        )
-        app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http500)
-        check(response.get_body() == "ᕕ( ᐛ )ᕗ")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http405)
+        check(ctx.response.get_body() == "")
 
 
 suite "Cookies":
@@ -369,9 +296,9 @@ suite "Cookies":
                 ctx.response.cookie("name", "Yay")
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
-        check(response.get_status() == Http200)
-        check(response.get_headers()["set-cookie"] == "name=Yay")
+        waitFor app.dispatch(ctx)
+        check(ctx.response.get_status() == Http200)
+        check(ctx.response.get_headers()["set-cookie"] == "name=Yay")
 
     test "Add multiple cookies":
         var ctx = Context.from_request(GetRequest("https://yumad.bro/"))
@@ -382,9 +309,9 @@ suite "Cookies":
                 ctx.response.cookie("surname", "Nay")
         )
         app.compile_routes()
-        let response = waitFor app.dispatch(ctx)
+        waitFor app.dispatch(ctx)
 
-        check(response.get_status() == Http200)
-        var headers = response.get_headers()
+        check(ctx.response.get_status() == Http200)
+        var headers = ctx.response.get_headers()
         check(headers["set-cookie", 0] == "name=Yay")
         check(headers["set-cookie", 1] == "surname=Nay")

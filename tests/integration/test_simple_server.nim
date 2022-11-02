@@ -1,4 +1,5 @@
 import httpClient
+import strutils
 import unittest
 
 
@@ -62,3 +63,8 @@ suite "Integration tests":
     test "Can access cookies":
         let response = client.get("http://localhost:3000/cookies/")
         check(response.headers["set-cookie"] == "name=Yay")
+
+    test "Unhandled error":
+        let response = client.get("http://localhost:3000/error/")
+        check(response.code() == Http500)
+        check(response.body.startsWith("invalid integer: Some business logic that should have been an int"))
