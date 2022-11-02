@@ -116,19 +116,16 @@ proc fail_safe(self: App, callback: Callback, ctx: Context): Future[Response] {.
 proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
     let potential_match = self.routing_table.match(ctx.request.path())
     if potential_match.isNone:
-        {.gcsafe.}:
-            return await fail_safe(self, self.not_found_callback, ctx)
+        return await fail_safe(self, self.not_found_callback, ctx)
 
     let match = potential_match.get()
     let route = match.value
     let callback = route.get_callback_of(ctx.request.http_method())
     if callback.isNone:
-        {.gcsafe.}:
-            return await fail_safe(self, self.method_not_allowed_callback, ctx)
+        return await fail_safe(self, self.method_not_allowed_callback, ctx)
 
     ctx.parameters = match.parameters
-    {.gcsafe.}:
-        return await fail_safe(self, callback.get(), ctx)
+    return await fail_safe(self, callback.get(), ctx)
 
 
 proc serve*(self: App, port: int, address: string = "") =
@@ -137,7 +134,8 @@ proc serve*(self: App, port: int, address: string = "") =
 
     proc main_dispatch(request: asynchttpserver.Request) {.async, gcsafe.} =
         var ctx = Context.from_request(request)
-        let response = await app.dispatch(ctx)
+        {.gcsafe.}:
+            let response = await app.dispatch(ctx)
         await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
 
     let server = asynchttpserver.newAsyncHttpServer()
