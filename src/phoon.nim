@@ -129,13 +129,12 @@ proc dispatch*(self: App, ctx: Context): Future[Response] {.async.} =
 
 
 proc serve*(self: App, port: int, address: string = "") =
-    var app = deepCopy(self)
-    app.compile_routes()
+    self.compile_routes()
 
     proc dispatch(request: asynchttpserver.Request) {.async.} =
         var ctx = Context.from_request(request)
         {.gcsafe.}:
-            let response = await app.dispatch(ctx)
+            let response = await self.dispatch(ctx)
         await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
 
     let server = asynchttpserver.newAsyncHttpServer()
