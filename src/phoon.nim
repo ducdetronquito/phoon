@@ -132,14 +132,14 @@ proc serve*(self: App, port: int, address: string = "") =
     var app = deepCopy(self)
     app.compile_routes()
 
-    proc main_dispatch(request: asynchttpserver.Request) {.async, gcsafe.} =
+    proc dispatch(request: asynchttpserver.Request) {.async.} =
         var ctx = Context.from_request(request)
         {.gcsafe.}:
             let response = await app.dispatch(ctx)
         await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
 
     let server = asynchttpserver.newAsyncHttpServer()
-    waitFor asynchttpserver.serve(server, port = Port(port), callback = main_dispatch, address = address)
+    waitFor asynchttpserver.serve(server, port = Port(port), callback = dispatch, address = address)
 
 
 proc serve*(self: App) =
