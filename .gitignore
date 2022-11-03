@@ -1,2 +1,5 @@
-
+# Windows executable artifacts
 *.exe
+
+# Integration tests executable artifacts
+tests/integration/bin/
