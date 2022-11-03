@@ -7,7 +7,7 @@ type
     Request* = ref object
         request: asynchttpserver.Request
         headers*: asynchttpserver.HttpHeaders
-        query_parameters: StringTableRef
+        query: Option[StringTableRef]
 
 
 proc new*(response_type: type[Request], std_request: asynchttpserver.Request, headers: asynchttpserver.HttpHeaders): Request =
@@ -23,10 +23,10 @@ proc http_method*(self: Request): asynchttpserver.HttpMethod =
 
 
 proc query*(self: Request, field: string): Option[string] =
-    if self.query_parameters == nil:
-        self.query_parameters = self.request.url.query.readData()
+    if self.query.isNone:
+        self.query = some(self.request.url.query.readData())
 
-    var value = self.query_parameters.getOrDefault(field)
+    var value = self.query.unsafeGet().getOrDefault(field)
     if value == "":
         return none(string)
     else:
