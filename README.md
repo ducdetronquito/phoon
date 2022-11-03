@@ -126,4 +126,4 @@ app.onError(
 
 ## License
 
-**Phoon** is released into the **Public Domain**. 🎉🍻
+**Phoon** is released under the [BSD Zero clause license](https://choosealicense.com/licenses/0bsd/). 🎉🍻
