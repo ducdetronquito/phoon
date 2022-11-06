@@ -13,64 +13,64 @@ type
 
 proc delete*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].delete_callback = some(callback)
+        self.routes[path].onDelete = some(callback)
         return
 
-    var route = Route(delete_callback: some(callback))
+    var route = Route(onDelete: some(callback))
     self.routes[path] =  route
 
 
 proc get*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].get_callback = some(callback)
+        self.routes[path].onGet = some(callback)
         return
 
-    var route = Route(get_callback: some(callback))
+    var route = Route(onGet: some(callback))
     self.routes[path] = route
 
 
 proc head*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].head_callback = some(callback)
+        self.routes[path].onHead = some(callback)
         return
 
-    var route = Route(head_callback: some(callback))
+    var route = Route(onHead: some(callback))
     self.routes[path] = route
 
 
 proc options*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].options_callback = some(callback)
+        self.routes[path].onOptions = some(callback)
         return
 
-    var route = Route(options_callback: some(callback))
+    var route = Route(onOptions: some(callback))
     self.routes[path] = route
 
 
 proc patch*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].patch_callback = some(callback)
+        self.routes[path].onPatch = some(callback)
         return
 
-    var route = Route(patch_callback: some(callback))
+    var route = Route(onPatch: some(callback))
     self.routes[path] = route
 
 
 proc post*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].post_callback = some(callback)
+        self.routes[path].onPost = some(callback)
         return
 
-    var route = Route(post_callback: some(callback))
+    var route = Route(onPost: some(callback))
     self.routes[path] = route
 
 
 proc put*(self: Router, path: string, callback: Callback) =
     if self.routes.hasKey(path):
-        self.routes[path].put_callback = some(callback)
+        self.routes[path].onPut = some(callback)
         return
 
-    var route = Route(put_callback: some(callback))
+    var route = Route(onPut: some(callback))
     self.routes[path] = route
 
 

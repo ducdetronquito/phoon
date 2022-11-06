@@ -37,10 +37,10 @@ suite "Router":
                     discard
             )
 
-        check(route.delete_callback.isSome)
-        check(route.get_callback.isSome)
-        check(route.head_callback.isSome)
-        check(route.options_callback.isSome)
-        check(route.patch_callback.isSome)
-        check(route.post_callback.isSome)
-        check(route.put_callback.isSome)
+        check(route.onDelete.isSome)
+        check(route.onGet.isSome)
+        check(route.onHead.isSome)
+        check(route.onOptions.isSome)
+        check(route.onPatch.isSome)
+        check(route.onPost.isSome)
+        check(route.onPut.isSome)
