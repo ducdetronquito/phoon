@@ -11,7 +11,7 @@ type
 
     App* = ref object
         router: Router
-        routing_table: Tree[Route]
+        routingTable: Tree[Route]
         errorCallback: ErrorCallback
         routeNotFound: Callback
 
@@ -27,7 +27,7 @@ proc default404callback(ctx: Context) {.async.} =
 proc new*(app_type: type[App]): App =
     return App(
         router: Router(),
-        routing_table: new Tree[Route],
+        routingTable: new Tree[Route],
         errorCallback: defaultErrorCallback,
         routeNotFound: default404callback,
     )
@@ -81,16 +81,16 @@ proc on404*(self: App, callback: Callback) =
     self.routeNotFound = callback
 
 
-proc compile_routes*(self: App) =
+proc compileRoutes*(self: App) =
     let middlewares = self.router.get_middlewares()
 
     for path, route in self.router.get_route_pairs():
-        var compiled_route = route.apply(middlewares)
-        self.routing_table.insert(path, compiled_route)
+        var compiledRoute = route.apply(middlewares)
+        self.routingTable.insert(path, compiledRoute)
 
 
 proc unsafeDispatch(self: App, ctx: Context) {.async.} =
-    let match = self.routing_table.match(ctx.request.path())
+    let match = self.routingTable.match(ctx.request.path())
     if match.isNone:
         await self.routeNotFound(ctx)
         return
@@ -114,7 +114,7 @@ proc dispatch*(self: App, ctx: Context) {.async.} =
 
 
 proc serve*(self: App, port: int, address: string = "") =
-    self.compile_routes()
+    self.compileRoutes()
 
     proc dispatch(request: asynchttpserver.Request) {.async.} =
         var ctx = Context.from_request(request)
