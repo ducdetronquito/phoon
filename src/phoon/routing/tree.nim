@@ -34,9 +34,9 @@ type
     Parameters* = ref object
         data: Table[string, string]
 
-    Result*[T] = object
-            value*: T
-            parameters*: Parameters
+    Result*[T]= tuple
+        value: T
+        parameters: Parameters
 
 
 proc from_keys(table: type[Parameters], keys: seq[string], values: seq[string]): Parameters =
@@ -268,12 +268,9 @@ proc match*[T](self: Tree[T], path: string): Option[Result[T]] =
 
         if context.path_is_fully_parsed():
             if current_node.is_leaf:
-                return some(
-                    Result[T](
-                        value: current_node.value.get(),
-                        parameters: Parameters.from_keys(current_node.parameters, context.collected_parameters)
-                    )
-                )
+                let parameters= Parameters.from_keys(current_node.parameters, context.collected_parameters)
+                let value = current_node.value.get()
+                return some((value, parameters))
             else:
                 return none(Result[T])
         else:

@@ -90,19 +90,18 @@ proc compile_routes*(self: App) =
 
 
 proc unsafeDispatch(self: App, ctx: Context) {.async.} =
-    let potential_match = self.routing_table.match(ctx.request.path())
-    if potential_match.isNone:
+    let match = self.routing_table.match(ctx.request.path())
+    if match.isNone:
         await self.routeNotFound(ctx)
         return
 
-    let match = potential_match.get()
-    let route = match.value
-    let callback = route.get_callback_of(ctx.request.httpMethod())
+    let (route, parameters)  = match.unsafeGet()
+    let callback = route.getCallback(ctx.request.httpMethod())
     if callback.isNone:
         ctx.response.status(Http405)
         return
 
-    ctx.parameters = match.parameters
+    ctx.parameters = parameters
     await callback.unsafeGet()(ctx)
     return
 

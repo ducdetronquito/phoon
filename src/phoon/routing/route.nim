@@ -54,7 +54,7 @@ proc put*(self: Route, callback: Callback): Route {.discardable.} =
     return self
 
 
-proc get_callback_of*(route: Route, httpMethod: HttpMethod): Option[Callback] =
+proc getCallback*(route: Route, httpMethod: HttpMethod): Option[Callback] =
     case httpMethod
     of HttpMethod.HttpDelete:
         return route.onDelete
