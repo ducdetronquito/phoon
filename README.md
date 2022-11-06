@@ -1,11 +1,10 @@
 
 # Phoon 🐇⚡
 
-A web framework inspired by [ExpressJS](https://expressjs.com/).
+![Github Actions](https://github.com/ducdetronquito/phoon/workflows/Github%20Actions/badge.svg) [![License](https://img.shields.io/badge/License-BSD%200--Clause-ff69b4.svg)](https://github.com/ducdetronquito/h11#license)
 
 
-![Github Actions](https://github.com/ducdetronquito/phoon/workflows/Github%20Actions/badge.svg) [![License](https://img.shields.io/badge/license-public%20domain-ff69b4.svg)](https://github.com/ducdetronquito/phoon#license)
-
+A simple web framework for Nim.
 
 ## Usage
 
