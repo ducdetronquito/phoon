@@ -18,7 +18,7 @@ proc path*(self: Request): string =
     return self.request.url.path
 
 
-proc http_method*(self: Request): asynchttpserver.HttpMethod =
+proc httpMethod*(self: Request): asynchttpserver.HttpMethod =
     return self.request.reqMethod
 
 

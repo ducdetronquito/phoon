@@ -97,7 +97,7 @@ proc unsafeDispatch(self: App, ctx: Context) {.async.} =
 
     let match = potential_match.get()
     let route = match.value
-    let callback = route.get_callback_of(ctx.request.http_method())
+    let callback = route.get_callback_of(ctx.request.httpMethod())
     if callback.isNone:
         ctx.response.status(Http405)
         return
