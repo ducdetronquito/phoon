@@ -89,31 +89,31 @@ proc apply*(self: Route, middlewares: seq[Middleware]): Route =
     result = new Route
 
     if self.onDelete.isSome:
-        let callback = self.onDelete.get().apply(middlewares)
+        let callback = self.onDelete.unsafeGet().apply(middlewares)
         result.onDelete = some(callback)
 
     if self.onGet.isSome:
-        let callback = self.onGet.get().apply(middlewares)
+        let callback = self.onGet.unsafeGet().apply(middlewares)
         result.onGet = some(callback)
 
     if self.onHead.isSome:
-        let callback = self.onHead.get().apply(middlewares)
+        let callback = self.onHead.unsafeGet().apply(middlewares)
         result.onHead = some(callback)
 
     if self.onOptions.isSome:
-        let callback = self.onOptions.get().apply(middlewares)
+        let callback = self.onOptions.unsafeGet().apply(middlewares)
         result.onOptions = some(callback)
 
     if self.onPatch.isSome:
-        let callback = self.onPatch.get().apply(middlewares)
+        let callback = self.onPatch.unsafeGet().apply(middlewares)
         result.onPatch = some(callback)
 
     if self.onPost.isSome:
-        let callback = self.onPost.get().apply(middlewares)
+        let callback = self.onPost.unsafeGet().apply(middlewares)
         result.onPost = some(callback)
 
     if self.onPut.isSome:
-        let callback = self.onPut.get().apply(middlewares)
+        let callback = self.onPut.unsafeGet().apply(middlewares)
         result.onPut = some(callback)
 
     return result

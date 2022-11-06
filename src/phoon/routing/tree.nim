@@ -177,7 +177,7 @@ proc insert*[T](self: Tree, path: string, value: T) =
         let is_last_character = index == path.len() - 1
         let potential_child = current_node.find_child_by_path(character)
         if potential_child.isSome:
-            var next_child = potential_child.get()
+            var next_child = potential_child.unsafeGet()
             if next_child.path_type == PathType.Strict and is_last_character:
                 current_node.remove_child_by_path(character)
                 self.add_children(
@@ -269,7 +269,7 @@ proc match*[T](self: Tree[T], path: string): Option[Result[T]] =
         if context.path_is_fully_parsed():
             if current_node.is_leaf:
                 let parameters= Parameters.from_keys(current_node.parameters, context.collected_parameters)
-                let value = current_node.value.get()
+                let value = current_node.value.unsafeGet()
                 return some((value, parameters))
             else:
                 return none(Result[T])
