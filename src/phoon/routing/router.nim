@@ -80,12 +80,12 @@ proc route*(self: Router, path: string): Route {.discardable.} =
     return route
 
 
-iterator get_route_pairs*(self: Router): tuple[path: string, route: Route] =
+iterator getRoutePairs*(self: Router): tuple[path: string, route: Route] =
     for path, route in self.routes.pairs:
         yield (path, route)
 
 
-proc get_middlewares*(self: Router): seq[Middleware] =
+proc getMiddlewares*(self: Router): seq[Middleware] =
     return self.middlewares
 
 
@@ -93,11 +93,11 @@ proc mount*(self: Router, path: string, router: Router) =
     if path.contains("*"):
         raise InvalidPathError(msg: "Cannot mount a sub-router on a wildcard route.")
 
-    let middlewares = router.get_middlewares()
+    let middlewares = router.getMiddlewares()
 
-    for sub_path, route in router.get_route_pairs():
-        let compiled_route = route.apply(middlewares)
-        self.routes[path & sub_path] = compiled_route
+    for subPath, route in router.getRoutePairs():
+        let compiledRoute = route.apply(middlewares)
+        self.routes[path & subPath] = compiledRoute
 
 
 proc use*(self: Router, middleware: Middleware) =

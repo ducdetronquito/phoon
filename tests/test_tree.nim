@@ -13,17 +13,17 @@ suite "Tree":
 
         let children = tree.root.children[0].children
         check(children.len() == 3)
-        check(children[0].path_type == PathType.Wildcard)
-        check(children[1].path_type == PathType.Parametrized)
-        check(children[2].path_type == PathType.Strict)
+        check(children[0].pathType == PathType.Wildcard)
+        check(children[1].pathType == PathType.Parametrized)
+        check(children[2].pathType == PathType.Strict)
 
     test "A leaf node knows it's available parameters":
         var tree = new Tree[string]
         tree.insert("/{api_version}/users/{id}", "Bobby")
 
-        let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
-        check(last_node.is_leaf == true)
-        check(last_node.parameters == ["api_version", "id"])
+        let lastNode = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        check(lastNode.isLeaf == true)
+        check(lastNode.parameters == ["api_version", "id"])
 
 
 suite "Strict routes":
@@ -89,9 +89,9 @@ suite "Wilcard routes":
     test "Insert a route with a wildcard":
         var tree = Tree[string].new()
         tree.insert("/user*", "Bobby")
-        let last_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0]
-        check(last_node.path == '*')
-        check(last_node.path_type == PathType.Wildcard)
+        let lastNode = tree.root.children[0].children[0].children[0].children[0].children[0].children[0]
+        check(lastNode.path == '*')
+        check(lastNode.pathType == PathType.Wildcard)
 
     test "Fail to match when a path is fully parsed but the route is partially matched":
         var tree = Tree[string].new()
@@ -150,11 +150,11 @@ suite "Parametrized routes":
     test "Insert a route with a parameter":
         var tree = new Tree[string]
         tree.insert("/users/{id}", "Bobby")
-        let parameter_node = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
-        check(parameter_node.path == '{')
-        check(parameter_node.path_type == PathType.Parametrized)
-        check(parameter_node.parameter_name == "id")
-        check(parameter_node.parameters == ["id"])
+        let parameterNode = tree.root.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0]
+        check(parameterNode.path == '{')
+        check(parameterNode.pathType == PathType.Parametrized)
+        check(parameterNode.parameterName == "id")
+        check(parameterNode.parameters == ["id"])
 
     test "Insert a route with two parameters":
         var tree = new Tree[string]
@@ -163,8 +163,8 @@ suite "Parametrized routes":
         let books = id.children[0].children[0].children[0].children[0].children[0].children[0].children[0]
         let title = books.children[0]
         check(title.path == '{')
-        check(title.path_type == PathType.Parametrized)
-        check(title.parameter_name == "title")
+        check(title.pathType == PathType.Parametrized)
+        check(title.parameterName == "title")
         check(title.parameters == ["id", "title"])
 
     test "Fail to match when a path is fully parsed but the route is partially matched":

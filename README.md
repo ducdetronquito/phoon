@@ -35,15 +35,15 @@ app.get("/us*",
 app.get("/books/{title}",
     proc (ctx: Context) {.async.} =
         # You can retrieve parameters of the URL path
-        var book_title = ctx.parameters.get("title")
+        var bookTitle = ctx.parameters.get("title")
 
         # You can also retrieve url-decoded query parameters
         let count = ctx.request.query("count")
         if count.isNone:
-            ctx.response.body("Of course I read '" & book_title & "' !")
+            ctx.response.body("Of course I read '" & bookTitle & "' !")
         else:
             ctx.response.body(
-                "Of course I read '" & book_title & "', "
+                "Of course I read '" & bookTitle & "', "
                 "at least " & count & " times!"
             )
 )
@@ -79,14 +79,14 @@ app.serve(8080)
 ```nim
 import phoon
 
-var sub_router = Router()
+var router = Router()
 
-sub_router.get("/users",
+router.get("/users",
     proc (ctx: Context) {.async.} =
         ctx.response.body("Here are some nice users")
 )
 
-app.mount("/nice", sub_router)
+app.mount("/nice", router)
 ```
 
 ### Register a middleware

@@ -11,6 +11,8 @@ type
         response*: Response
 
 
-proc from_request*(context_type: type[Context], std_request: asynchttpserver.Request): Context =
-    var request = Request.new(std_request = std_request, headers = std_request.headers)
-    return Context(request: request, response: Response.new())
+proc new*(contextType: type[Context], request: asynchttpserver.Request): Context =
+    return Context(
+        request: Request.new(request = request, headers = request.headers),
+        response: Response.new()
+    )

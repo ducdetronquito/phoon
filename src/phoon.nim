@@ -24,7 +24,7 @@ proc default404callback(ctx: Context) {.async.} =
     ctx.response.status(Http404)
 
 
-proc new*(app_type: type[App]): App =
+proc new*(appType: type[App]): App =
     return App(
         router: Router(),
         routingTable: new Tree[Route],
@@ -82,9 +82,9 @@ proc on404*(self: App, callback: Callback) =
 
 
 proc compileRoutes*(self: App) =
-    let middlewares = self.router.get_middlewares()
+    let middlewares = self.router.getMiddlewares()
 
-    for path, route in self.router.get_route_pairs():
+    for path, route in self.router.getRoutePairs():
         var compiledRoute = route.apply(middlewares)
         self.routingTable.insert(path, compiledRoute)
 
@@ -117,11 +117,11 @@ proc serve*(self: App, port: int, address: string = "") =
     self.compileRoutes()
 
     proc dispatch(request: asynchttpserver.Request) {.async.} =
-        var ctx = Context.from_request(request)
+        var ctx = Context.new(request)
         {.gcsafe.}:
             await self.dispatch(ctx)
         let response = ctx.response
-        await asynchttpserver.respond(request, response.get_status(), response.get_body(), response.get_headers())
+        await asynchttpserver.respond(request, response.getStatus(), response.getBody(), response.getHeaders())
 
     let server = asynchttpserver.newAsyncHttpServer()
     waitFor asynchttpserver.serve(server, port = Port(port), callback = dispatch, address = address)

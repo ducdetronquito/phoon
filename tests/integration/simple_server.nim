@@ -21,8 +21,8 @@ app.get("/ab*",
 
 app.get("/books/{title}",
     proc (ctx: Context) {.async.} =
-        var book_title = ctx.parameters.get("title")
-        ctx.response.body("Of course I read '" & book_title & "' !")
+        var bookTitle = ctx.parameters.get("title")
+        ctx.response.body("Of course I read '" & bookTitle & "' !")
 )
 
 app.get("/json",
@@ -49,19 +49,19 @@ app.get("/error/",
 )
 
 
-var sub_router = Router()
+var router = Router()
 
-sub_router.get("/users",
+router.get("/users",
     proc (ctx: Context) {.async.} =
         ctx.response.body("Here are some nice users")
 )
 
-app.mount("/nice", sub_router)
+app.mount("/nice", router)
 
 
-var authenticated_router = Router()
+var authenticatedRouter = Router()
 
-authenticated_router.get("/",
+authenticatedRouter.get("/",
     proc (ctx: Context) {.async.} =
         ctx.response.body("Admins, he is doing it sideways !")
 )
@@ -75,8 +75,8 @@ proc SimpleAuthMiddleware(next: Callback): Callback =
             ctx.response.status(Http401)
 
 
-authenticated_router.use(SimpleAuthMiddleware)
-app.mount("/admins", authenticated_router)
+authenticatedRouter.use(SimpleAuthMiddleware)
+app.mount("/admins", authenticatedRouter)
 app.onError(
     proc (ctx: Context, error: ref Exception) {.async.} =
         ctx.response.body(error.msg).status(Http500)

@@ -10,8 +10,8 @@ type
         query: Option[StringTableRef]
 
 
-proc new*(response_type: type[Request], std_request: asynchttpserver.Request, headers: asynchttpserver.HttpHeaders): Request =
-    return Request(request: std_request, headers: headers)
+proc new*(responseType: type[Request], request: asynchttpserver.Request, headers: asynchttpserver.HttpHeaders): Request =
+    return Request(request: request, headers: headers)
 
 
 proc path*(self: Request): string =

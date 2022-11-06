@@ -8,19 +8,19 @@ type
         headers: HttpHeaders
 
 
-proc get_body*(self: Response): string =
+proc getBody*(self: Response): string =
     return self.body
 
 
-proc get_status*(self: Response): HttpCode =
+proc getStatus*(self: Response): HttpCode =
     return self.status
 
 
-proc get_headers*(self: Response): HttpHeaders =
+proc getHeaders*(self: Response): HttpHeaders =
     return self.headers
 
 
-proc new*(response_type: type[Response]): Response =
+proc new*(responseType: type[Response]): Response =
     return Response(status: Http200, body: "", headers: newHttpHeaders())
 
 

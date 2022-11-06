@@ -2,9 +2,9 @@ import asynchttpserver
 import uri
 
 
-proc Request*(http_method: HttpMethod, path: string): Request =
+proc Request*(httpMethod: HttpMethod, path: string): Request =
     let uri = parseUri(path)
-    return Request(reqMethod: http_method, url: uri)
+    return Request(reqMethod: httpMethod, url: uri)
 
 proc GetRequest*(path: string): Request =
     let uri = parseUri(path)
