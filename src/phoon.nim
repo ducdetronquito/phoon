@@ -1,7 +1,6 @@
 from asynchttpserver import nil
 import asyncdispatch except Callback
-import httpcore
-import options
+import logging, httpcore, options, strformat
 import phoon/context/[context, request, response]
 import phoon/routing/[errors, route, router, tree]
 
@@ -113,7 +112,7 @@ proc dispatch*(self: App, ctx: Context) {.async.} =
         await self.errorCallback(ctx, error)
 
 
-proc serve*(self: App, port: int, address: string = "") =
+proc serve*(self: App, address: string = "", port: int) =
     self.compileRoutes()
 
     proc dispatch(request: asynchttpserver.Request) {.async.} =
@@ -123,12 +122,21 @@ proc serve*(self: App, port: int, address: string = "") =
         let response = ctx.response
         await asynchttpserver.respond(request, response.getStatus(), response.getBody(), response.getHeaders())
 
+    # Setup a default console logger if none exists already
+    if logging.getHandlers().len == 0:
+        addHandler(logging.newConsoleLogger())
+        setLogFilter(when defined(release): lvlInfo else: lvlDebug)
+
+    if address == "":
+        when defined(windows):
+            logging.info(&"Bunny hopping at http://127.0.0.1:{port}")
+        else:
+            logging.info(&"Bunny hopping at http://0.0.0.0:{port}")
+    else:
+        logging.info(&"Bunny hopping at http://{address}:{port}")
+
     let server = asynchttpserver.newAsyncHttpServer()
     waitFor asynchttpserver.serve(server, port = Port(port), callback = dispatch, address = address)
-
-
-proc serve*(self: App) =
-    self.serve(8080)
 
 
 export asyncdispatch except Callback
