@@ -1,7 +1,5 @@
 from asynchttpserver import nil
-import request
-import response
-import ../routing/tree
+import request, response, tree
 
 
 type

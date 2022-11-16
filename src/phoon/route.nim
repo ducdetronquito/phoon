@@ -1,7 +1,5 @@
-import asyncdispatch
-import asynchttpserver
-import ../context/context
-import options
+import asyncdispatch, asynchttpserver, options
+import context
 
 
 type

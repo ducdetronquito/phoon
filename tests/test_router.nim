@@ -1,5 +1,5 @@
 import phoon
-import phoon/routing/route
+import phoon/route
 import unittest
 
 

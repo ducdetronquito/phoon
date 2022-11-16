@@ -1,8 +1,7 @@
 from asynchttpserver import nil
 import asyncdispatch except Callback
 import logging, httpcore, options, strformat
-import phoon/context/[context, request, response]
-import phoon/routing/[errors, route, router, tree]
+import phoon/[context, errors, request, response, route, router, tree]
 
 
 type

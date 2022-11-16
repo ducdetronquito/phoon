@@ -1,4 +1,4 @@
-import phoon/routing/[errors, tree]
+import phoon/[errors, tree]
 import options
 import unittest
 
