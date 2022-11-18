@@ -1,4 +1,4 @@
-import phoon
+import ../../src/phoon
 import strutils
 
 var app = new App
@@ -81,4 +81,5 @@ app.onError(
     proc (ctx: Context, error: ref Exception) {.async.} =
         ctx.response.body(error.msg).status(Http500)
 )
+
 app.serve("0.0.0.0", 3000)

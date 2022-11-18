@@ -1,16 +1,18 @@
 from asynchttpserver import nil
-import request, response, tree
+import config, request, response, tree
 
 
 type
     Context* = ref object
-        request*: request.Request
+        request*: Request
         parameters*: Parameters
         response*: Response
+        config*: Config
 
 
-proc new*(contextType: type[Context], request: asynchttpserver.Request): Context =
+proc new*(contextType: type[Context], request: asynchttpserver.Request, config: Config): Context =
     return Context(
         request: Request.new(request = request, headers = request.headers),
-        response: Response.new()
+        response: Response.new(),
+        config: config
     )

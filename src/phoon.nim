@@ -1,7 +1,7 @@
 from asynchttpserver import nil
 import asyncdispatch except Callback
-import logging, httpcore, options, strformat
-import phoon/[context, errors, request, response, route, router, tree]
+import httpcore, logging, options, os, strformat
+import phoon/[config, context, errors, request, response, route, router, staticfiles, tree]
 
 
 type
@@ -12,6 +12,7 @@ type
         routingTable: Tree[Route]
         errorCallback: ErrorCallback
         routeNotFound: Callback
+        config: Config
 
 
 proc defaultErrorCallback(ctx: Context, error: ref Exception) {.async.} =
@@ -23,11 +24,18 @@ proc default404callback(ctx: Context) {.async.} =
 
 
 proc new*(appType: type[App]): App =
+    let publicDirectory = getCurrentDir() / "public/"
+    let config = Config(publicDirectory: publicDirectory, serveStaticFiles: true)
+    return App.new(config)
+
+
+proc new*(appType: type[App], config: Config): App =
     return App(
         router: Router(),
         routingTable: new Tree[Route],
         errorCallback: defaultErrorCallback,
         routeNotFound: default404callback,
+        config: config
     )
 
 
@@ -112,10 +120,13 @@ proc dispatch*(self: App, ctx: Context) {.async.} =
 
 
 proc serve*(self: App, address: string = "", port: int) =
+    if self.config.serveStaticFiles:
+        self.get("/public/*", staticfiles.serve)
+
     self.compileRoutes()
 
     proc dispatch(request: asynchttpserver.Request) {.async.} =
-        var ctx = Context.new(request)
+        var ctx = Context.new(request, self.config)
         {.gcsafe.}:
             await self.dispatch(ctx)
         let response = ctx.response
@@ -139,6 +150,7 @@ proc serve*(self: App, address: string = "", port: int) =
 
 
 export asyncdispatch except Callback
+export config
 export context
 export errors
 export httpcore
